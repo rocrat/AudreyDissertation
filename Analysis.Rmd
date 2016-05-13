@@ -1,0 +1,13 @@
+---
+title: "Audrey Dissertation Analysis"
+author: "Audrey Nelson"
+date: "May 12, 2016"
+output: word_document
+---
+
+```{r libraries and read-in, ehco = FALSE}
+# library(foreign)
+library(memisc)
+df <- as.data.set(spss.system.file("./Data/College coping data (complete).sav"))
+df <- as.data.frame(df)
+```
