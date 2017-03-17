@@ -123,3 +123,8 @@ m6 <- lm(perf ~ total.s + total.b + total.s:total.b, data = df)
 sm6 <- summary(m6)
 # View the summary
 print(sm6) #nothing significant
+
+
+write.csv(sm3$coef, file = "Model3Results.csv")
+
+
