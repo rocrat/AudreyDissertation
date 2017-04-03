@@ -212,31 +212,27 @@ df[, 33]
 
 df$total.e <- df$e195+df$e196+df$e197
 
-# Factored (academic engagement) model with interaction
+# Factored (academic engagement) model with interaction for exercise
 m4e <- lm(emot ~ total.s + total.e + total.s:total.e, data = df)
 #Create summary of the model for evaluation
 sm4e <- summary(m4e)
 # View the summary
-print(sm4e) #nothing significant
+print(sm4e)
 
 m3e <- lm(skills ~ total.s + total.e + total.s:total.e, data = df)
-#Create summary of the model for evaluation
 sm3e <- summary(m3e)
-# View the summary
-print(sm3e) #nothing significant
+print(sm3e)
 
 m5e <- lm(part ~ total.s + total.e + total.s:total.e, data = df)
-#Create summary of the model for evaluation
 sm5e <- summary(m5e)
-# View the summary
-print(sm5e) #nothing significant
+print(sm5e)
 
 m6e <- lm(perf ~ total.s + total.e + total.s:total.e, data = df)
-#Create summary of the model for evaluation
 sm6e <- summary(m6e)
-# View the summary
-print(sm6e) #nothing significant
+print(sm6e)
 
+
+df$total.m <-  apply(df[, which(grepl("^m.*", names(df)))], 1, sum,  na.rm = TRUE)
 
 #Simple plot of the relationship between s and e
 ggplot(df, aes(x = total.s, y = total.e)) + 
@@ -263,3 +259,6 @@ ggplot(df, aes(x = total.e, y = total.m)) +
 
 # correlation of e and m
 cem <- cor(df$total.e, df$total.m, use = "pairwise.complete.obs")
+
+
+
