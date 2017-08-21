@@ -1,0 +1,37 @@
+<fulfillmentToken fulfillmentType="loan" auth="user" xmlns="http://ns.adobe.com/adept">
+  <distributor>urn:uuid:9cb786e8-586a-4950-8901-fff8d2ee6025</distributor>
+  <operatorURL>http://acs.ebookcentral.proquest.com/fulfillment</operatorURL>
+  <transaction>4807065_66169116</transaction>
+  <expiration>2017-08-28T16:37:17-07:00</expiration>
+  <resourceItemInfo>
+    <resource>urn:uuid:00000000-0000-0000-0000-000004807065</resource>
+    <resourceItem>0</resourceItem>
+    <metadata>
+      <dc:title xmlns:dc="http://purl.org/dc/elements/1.1/">The Concise APA Handbook</dc:title>
+      <dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Paul Chamness Miller; Rachael Ruegg; Naoko Araki</dc:creator>
+      <dc:publisher xmlns:dc="http://purl.org/dc/elements/1.1/">Information Age Publishing</dc:publisher>
+      <dc:identifier xmlns:dc="http://purl.org/dc/elements/1.1/">4807065</dc:identifier>
+      <dc:format xmlns:dc="http://purl.org/dc/elements/1.1/">application/pdf</dc:format>
+    </metadata>
+    <licenseToken>
+      <resource>urn:uuid:00000000-0000-0000-0000-000004807065</resource>
+      <permissions>
+        <display>
+          <duration>86399</duration>
+        </display>
+        <excerpt>
+          <duration>86399</duration>
+          <count initial="2" max="2" incrementInterval="43199"/>
+        </excerpt>
+        <print>
+          <duration>86399</duration>
+          <count initial="2" max="2" incrementInterval="43199"/>
+        </print>
+        <play>
+          <duration>86399</duration>
+        </play>
+      </permissions>
+    </licenseToken>
+  </resourceItemInfo>
+  <hmac>LBYKsjFBUTLEqYmg1e+MlQICU1Q=</hmac>
+</fulfillmentToken>
