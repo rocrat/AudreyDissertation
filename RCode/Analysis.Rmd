@@ -13,8 +13,12 @@ library(plyr)
 library(dplyr)
 library(ggplot2)
 library(pander)
-df <- as.data.set(spss.system.file("./Data/College coping data (complete).sav"))
+df <- as.data.set(spss.system.file("./Rcode/Data/College coping data (complete).sav"))
 df <- as.data.frame(df)
+
+write.csv(df,
+          "./Rcode/Data/College_coping_data_Complete.csv")
+
 ```
 
 ```{r exaine b and m, echo = FALSE, warning = FALSE}
