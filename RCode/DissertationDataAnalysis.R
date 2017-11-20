@@ -260,5 +260,322 @@ ggplot(df, aes(x = total.e, y = total.m)) +
 # correlation of e and m
 cem <- cor(df$total.e, df$total.m, use = "pairwise.complete.obs")
 
+####################################################################
+
+#Running means of age demographic against AE skills to see if I need to contrast code
+#model for age -> m age -> mage (name of model), skills=skl
+mageskl <- lm(skills ~ -1 + age, data = df)
+summary(mageskl)
+
+#Running means of age demographic against AE emot to see if I need to contrast code
+mageemot <- lm(emot ~ -1 + age, data = df)
+summary(mageemot)
+
+#Running means of age demographic against AE part to see if I need to contrast code
+magepart <- lm(part ~ -1 + age, data = df)
+summary(magepart)
+
+#Running means of age demographic against AE perf to see if I need to contrast code
+mageperf <- lm(perf ~ -1 + age, data = df)
+summary(mageperf)
+
+#####################################################################
+
+#Running means of ethnicity demographic against AE skills to see if I need to contrast code
+#model for ethnicity -> m ethnicity -> meth (name of model), skills=skl
+methskl <- lm(skills ~ -1 + ethnicity, data = df)
+summary(methskl)
+
+#Running means of ethnicity demographic against AE emot to see if I need to contrast code
+methemot <- lm(emot ~ -1 + ethnicity, data = df)
+summary(methemot)
+
+#Running means of ethnicity demographic against AE part to see if I need to contrast code
+methpart <- lm(part ~ -1 + ethnicity, data = df)
+summary(methpart)
+
+#Running means of ethnicity demographic against AE perf to see if I need to contrast code
+methperf <- lm(perf ~ -1 + ethnicity, data = df)
+summary(methperf)
+
+######################################################################
+
+#Running means of class demographic against AE skills to see if I need to contrast code
+#model for class -> m class -> mclass (name of model), skills=skl
+mclassskl <- lm(skills ~ -1 + class, data = df)
+summary(mclassskl)
+
+#Running means of class demographic against AE emot to see if I need to contrast code
+mclassemot <- lm(emot ~ -1 + class, data = df)
+summary(mclassemot)
+
+#Running means of class demographic against AE part to see if I need to contrast code
+mclasspart <- lm(part ~ -1 + class, data = df)
+summary(mclasspart)
+
+#Running means of class demographic against AE perf to see if I need to contrast code
+mclassperf <- lm(perf ~ -1 + class, data = df)
+summary(mclassperf)
+
+########################################################################
+
+#Running means of gender demographic against AE skills to see if I need to contrast code
+#model for gender -> m gender -> mgend (name of model), skills=skl
+mgendskl <- lm(skills ~ -1 + gender, data = df)
+summary(mgendskl)
+
+#Running means of gender demographic against AE emot to see if I need to contrast code
+mgendemot <- lm(emot ~ -1 + gender, data = df)
+summary(mgendemot)
+
+#Running means of class demographic against AE part to see if I need to contrast code
+mgendpart <- lm(part ~ -1 + gender, data = df)
+summary(mgendpart)
+
+#Running means of class demographic against AE perf to see if I need to contrast code
+mgendperf <- lm(perf ~ -1 + gender, data = df)
+summary(mgendperf)
+
+########################################################################
+
+#Running contrast code/general linear hypothesis testing for age and AE skills
+library(gmodels)
+mageskl <- lm(skills ~ -1 + age, data = df)
+summary(mageskl)
+
+### Create a matrices of contrasts with 1 contrast per line
+### Here we create linear combinations of the means where 
+### we subtract one mean from the other using 1 and -1 and
+### 0 drops the mean from the test so we are only looking
+### at pairwise comparisons
+
+#compare 18-19 with 20-21
+age.1819v2021 <- matrix(c(1, -1, 0, 0),
+                        nrow = 1,
+                        ncol = 4,
+                        byrow = TRUE)
+
+#compare 18-19 with 22-25
+age.1819v2225 <- matrix(c(1, 0, -1, 0),
+                        nrow = 1,
+                        ncol = 4,
+                        byrow = TRUE)
+
+#compare 18-19 with average of two middle age categories
+age.1819v2025 <- matrix(c(1, -1/2, -1/2, 0),
+                        nrow = 1,
+                        ncol = 4,
+                        byrow = TRUE)
+
+#compare 18-19 with oldest category
+age.1819v31 <- matrix(c(1, 0, 0, -1),
+                      nrow = 1,
+                      ncol = 4,
+                      byrow = TRUE)
+
+#Compare average of 20-25 with oldest group 
+age.31v2025 <- matrix(c(0, -1/2, -1/2, 1),
+                      nrow = 1,
+                      ncol = 4,
+                      byrow = TRUE)
+
+### Now we use tests of general linear hypotheses (glh) to 
+### test for differences in the groups
+glh.test(mageskl,
+         cm = age.1819v2021)
+
+glh.test(mageskl,
+         cm = age.1819v2225)
+
+glh.test(mageskl,
+         cm = age.1819v2025)
+
+glh.test(mageskl,
+         cm = age.1819v31)
+
+glh.test(mageskl,
+         cm = age.31v2025)
+
+###############################################################################
+
+#Running contrast code/general linear hypothesis testing for age and AE emot
+library(gmodels)
+mageemot <- lm(emot ~ -1 + age, data = df)
+summary(mageemot)
+
+### Create a matrices of contrasts with 1 contrast per line
+### Here we create linear combinations of the means where 
+### we subtract one mean from the other using 1 and -1 and
+### 0 drops the mean from the test so we are only looking
+### at pairwise comparisons
+
+#compare 18-19 with 20-21
+age.1819v2021 <- matrix(c(1, -1, 0, 0),
+                        nrow = 1,
+                        ncol = 4,
+                        byrow = TRUE)
+
+#compare 18-19 with 22-25
+age.1819v2225 <- matrix(c(1, 0, -1, 0),
+                        nrow = 1,
+                        ncol = 4,
+                        byrow = TRUE)
+
+#compare 18-19 with oldest category
+age.1819v31 <- matrix(c(1, 0, 0, -1),
+                      nrow = 1,
+                      ncol = 4,
+                      byrow = TRUE)
+
+#compare average of 18-21 with 22-25
+age.1821v2225 <- matrix(c(-1/2, -1/2, 1, 0),
+                        nrow = 1,
+                        ncol = 4,
+                        byrow = TRUE)
+
+#Compare average of 18-21 with oldest group 
+age.31v1821 <- matrix(c(-1/2, -1/2, 0, 1),
+                      nrow = 1,
+                      ncol = 4,
+                      byrow = TRUE)
+
+### Now we use tests of general linear hypotheses (glh) to 
+### test for differences in the groups
+glh.test(mageemot,
+         cm = age.1819v2021)
+
+glh.test(mageemot,
+         cm = age.1819v2225)
+
+glh.test(mageemot,
+         cm = age.1819v31)
+
+glh.test(mageemot,
+         cm = age.1821v2225)
+
+glh.test(mageemot,
+         cm = age.31v1821)
 
 
+##########################################################################
+
+#Running contrast code/general linear hypothesis testing for age and AE part
+library(gmodels)
+magepart <- lm(part ~ -1 + age, data = df)
+summary(magepart)
+
+### Create a matrices of contrasts with 1 contrast per line
+### Here we create linear combinations of the means where 
+### we subtract one mean from the other using 1 and -1 and
+### 0 drops the mean from the test so we are only looking
+### at pairwise comparisons
+
+#compare 18-19 with 20-21
+age.1819v2021 <- matrix(c(1, -1, 0, 0),
+                        nrow = 1,
+                        ncol = 4,
+                        byrow = TRUE)
+
+#compare 18-19 with 22-25
+age.1819v2225 <- matrix(c(1, 0, -1, 0),
+                        nrow = 1,
+                        ncol = 4,
+                        byrow = TRUE)
+
+#compare 18-19 with oldest category
+age.1819v31 <- matrix(c(1, 0, 0, -1),
+                      nrow = 1,
+                      ncol = 4,
+                      byrow = TRUE)
+
+#compare average of 18-25 with oldest group
+age.1825v31 <- matrix(c(-1/3, -1/3, -1/3, 1),
+                        nrow = 1,
+                        ncol = 4,
+                        byrow = TRUE)
+
+
+### Now we use tests of general linear hypotheses (glh) to 
+### test for differences in the groups
+glh.test(magepart,
+         cm = age.1819v2021)
+
+glh.test(magepart,
+         cm = age.1819v2225)
+
+glh.test(magepart,
+         cm = age.1819v31)
+
+glh.test(magepart,
+         cm = age.1825v31)
+
+###########################################################################
+
+#Running contrast code/general linear hypothesis testing for age and AE perf
+library(gmodels)
+mageperf <- lm(perf ~ -1 + age, data = df)
+summary(mageperf)
+
+### Create a matrices of contrasts with 1 contrast per line
+### Here we create linear combinations of the means where 
+### we subtract one mean from the other using 1 and -1 and
+### 0 drops the mean from the test so we are only looking
+### at pairwise comparisons
+
+#compare 18-19 with 20-21
+age.1819v2021 <- matrix(c(1, -1, 0, 0),
+                        nrow = 1,
+                        ncol = 4,
+                        byrow = TRUE)
+
+#compare 18-19 with 22-25
+age.1819v2225 <- matrix(c(1, 0, -1, 0),
+                        nrow = 1,
+                        ncol = 4,
+                        byrow = TRUE)
+
+#compare 18-19 with oldest category
+age.1819v31 <- matrix(c(1, 0, 0, -1),
+                      nrow = 1,
+                      ncol = 4,
+                      byrow = TRUE)
+
+#compare 20-21 with 22-25
+age.2021v2225 <- matrix(c(0, 1, -1, 0),
+                      nrow = 1,
+                      ncol = 4,
+                      byrow = TRUE)
+
+#compare 20-21 with oldest group
+age.2021v31 <- matrix(c(0, 1, 0, -1),
+                      nrow = 1,
+                      ncol = 4,
+                      byrow = TRUE)
+
+#compare 22-25 with oldest group
+age.2225v31 <- matrix(c(0, 1, -1, 0),
+                      nrow = 1,
+                      ncol = 4,
+                      byrow = TRUE)
+
+### Now we use tests of general linear hypotheses (glh) to 
+### test for differences in the groups
+glh.test(mageperf,
+         cm = age.1819v2021)
+
+glh.test(mageperf,
+         cm = age.1819v2225)
+
+glh.test(mageperf,
+         cm = age.1819v31)
+
+glh.test(mageperf,
+         cm = age.2021v2225)
+
+glh.test(mageperf,
+         cm = age.2021v31)
+
+glh.test(mageperf,
+         cm = age.2225v31)
+
+#######################################################################
