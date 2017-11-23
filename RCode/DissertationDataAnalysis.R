@@ -4,7 +4,7 @@ library(plyr)
 library(dplyr)
 library(ggplot2)
 
-df <- as.data.set(spss.system.file("./Data/College coping data (complete).sav"))
+df <- as.data.set(spss.system.file("./Rcode/Data/College coping data (complete).sav"))
 df <- as.data.frame(df)
 
 #reshape to long form
@@ -579,3 +579,111 @@ glh.test(mageperf,
          cm = age.2225v31)
 
 #######################################################################
+
+### Test for relationship between engagement and sleep (total.b)
+
+ggplot(df[-33, ], aes(x = total.b, y = skills)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+sleepvskills <- lm(skills ~ total.b, data = df)
+plot(sleepvskills)
+
+### Definitely should remove 33 as it has high leverage as an outlier
+sleepvskills <- lm(skills ~ total.b, data = df[-33, ])
+plot(sleepvskills)
+summary(sleepvskills)
+
+### Test sleep vs emot
+ggplot(df, aes(x = total.b, y = emot)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+sleepvemot <- lm(emot ~ total.b, data = df[-33, ])
+plot(sleepvemot)
+summary(sleepvemot)
+
+### Test sleep vs perf
+ggplot(df[-c(33, 183), ], aes(x = total.b, y = perf)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+sleepvperf <- lm(perf ~ total.b, data = df[-33, ])
+plot(sleepvperf)
+summary(sleepvperf)
+
+### Test sleep vs part
+ggplot(df[-c(33), ], aes(x = total.b, y = part)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+sleepvpart <- lm(part ~ total.b, data = df[-33, ])
+plot(sleepvpart)
+summary(sleepvpart)
+
+df$total.eng <- with(df, skills + emot + perf + part)
+
+### Test sleep vs total engagement
+ggplot(df[-c(33), ], aes(x = total.b, y = total.e)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+sleepveng <- lm(total.eng ~ total.b, data = df[-33, ])
+plot(sleepveng)
+summary(sleepveng)
+
+
+##########################################################################
+
+### Test relationship between academic engagement and exercise
+### First calculate the total exercise score using weighted sum
+df$total.e <- with(df, 9*e195 + 6*e196 + 3*e197)
+
+ggplot(df[-33, ], aes(x = total.e, y = skills)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+
+### Test Exercise vs skills
+sleepvskills <- lm(skills ~ total.e, data = df[-33, ])
+plot(sleepvskills)
+summary(sleepvskills)
+
+### Test exercise vs emot
+ggplot(df, aes(x = total.e, y = emot)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+exercisevemot <- lm(emot ~ total.e, data = df[-33, ])
+plot(exercisevemot)
+summary(exercisevemot)
+
+### Test exercise vs perf
+ggplot(df[-c(33), ], aes(x = total.e, y = perf)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+exercisevperf <- lm(perf ~ total.e, data = df[-33, ])
+plot(exercisevperf)
+summary(exercisevperf)
+
+### Test exercise vs part
+ggplot(df[-c(33), ], aes(x = total.e, y = part)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+exercisevpart <- lm(part ~ total.e, data = df[-33, ])
+plot(exercisevpart)
+summary(exercisevpart)
+
+
+### Test exercise vs total engagement
+ggplot(df[-c(33), ], aes(x = total.e, y = total.eng)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+exerciseveng <- lm(total.eng ~ total.e, data = df[-33, ])
+plot(exerciseveng)
+summary(exerciseveng)
+
+
