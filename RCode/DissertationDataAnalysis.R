@@ -76,7 +76,7 @@ ggplot(df.bm.w, aes(x = bCat, y = total.s)) +
 
 ###################################################################################################
 
-#Creating factors for Academic Engagment variable
+#Creating factors for Academic Engagment variable ----
 df$skills <- with(df, 0.64*m143 + 0.59*m144 + 0.57*m145 + 0.55*m146 + 0.53*m147 + 0.53*m148 + 0.53*m149 + 0.51*m150 + 0.47*m151)
 
 df$emot <- with(df, 0.86*m152 + 0.86*m153 + 0.54*m154 + 0.46*m155 + 0.43*m156)
@@ -208,7 +208,7 @@ predictM3(total.s = 58, total.b = 22)#with both low
 df[, 33]
 
 ############################################################################################
-#Interaction effect with exercise
+#Interaction effect with exercise ----
 
 df$total.e <- df$e195+df$e196+df$e197
 
@@ -262,7 +262,7 @@ cem <- cor(df$total.e, df$total.m, use = "pairwise.complete.obs")
 
 ####################################################################
 
-#Running means of age demographic against AE skills to see if I need to contrast code
+#Running means of age demographic against AE skills to see if I need to contrast code ----
 #model for age -> m age -> mage (name of model), skills=skl
 mageskl <- lm(skills ~ -1 + age, data = df)
 summary(mageskl)
@@ -300,7 +300,7 @@ summary(methperf)
 
 ######################################################################
 
-#Running means of class demographic against AE skills to see if I need to contrast code
+#Running means of class demographic against AE skills to see if I need to contrast code----
 #model for class -> m class -> mclass (name of model), skills=skl
 mclassskl <- lm(skills ~ -1 + class, data = df)
 summary(mclassskl)
@@ -319,7 +319,7 @@ summary(mclassperf)
 
 ########################################################################
 
-#Running means of gender demographic against AE skills to see if I need to contrast code
+#Running means of gender demographic against AE skills to see if I need to contrast code ----
 #model for gender -> m gender -> mgend (name of model), skills=skl
 mgendskl <- lm(skills ~ -1 + gender, data = df)
 summary(mgendskl)
@@ -328,17 +328,17 @@ summary(mgendskl)
 mgendemot <- lm(emot ~ -1 + gender, data = df)
 summary(mgendemot)
 
-#Running means of class demographic against AE part to see if I need to contrast code
+#Running means of gender demographic against AE part to see if I need to contrast code
 mgendpart <- lm(part ~ -1 + gender, data = df)
 summary(mgendpart)
 
-#Running means of class demographic against AE perf to see if I need to contrast code
+#Running means of gender demographic against AE perf to see if I need to contrast code
 mgendperf <- lm(perf ~ -1 + gender, data = df)
 summary(mgendperf)
 
 ########################################################################
 
-#Running contrast code/general linear hypothesis testing for age and AE skills
+#Running contrast code/general linear hypothesis testing for age and AE skills ----
 library(gmodels)
 mageskl <- lm(skills ~ -1 + age, data = df)
 summary(mageskl)
@@ -398,7 +398,7 @@ glh.test(mageskl,
 
 ###############################################################################
 
-#Running contrast code/general linear hypothesis testing for age and AE emot
+#Running contrast code/general linear hypothesis testing for age and AE emot----
 library(gmodels)
 mageemot <- lm(emot ~ -1 + age, data = df)
 summary(mageemot)
@@ -459,7 +459,7 @@ glh.test(mageemot,
 
 ##########################################################################
 
-#Running contrast code/general linear hypothesis testing for age and AE part
+#Running contrast code/general linear hypothesis testing for age and AE part ----
 library(gmodels)
 magepart <- lm(part ~ -1 + age, data = df)
 summary(magepart)
@@ -511,7 +511,7 @@ glh.test(magepart,
 
 ###########################################################################
 
-#Running contrast code/general linear hypothesis testing for age and AE perf
+#Running contrast code/general linear hypothesis testing for age and AE perf ----
 library(gmodels)
 mageperf <- lm(perf ~ -1 + age, data = df)
 summary(mageperf)
@@ -580,7 +580,7 @@ glh.test(mageperf,
 
 #######################################################################
 
-### Test for relationship between engagement and sleep (total.b)
+### Test for relationship between engagement and sleep (total.b) using linear model ----
 
 ggplot(df[-33, ], aes(x = total.b, y = skills)) + 
   geom_point() + 
@@ -624,7 +624,7 @@ summary(sleepvpart)
 df$total.eng <- with(df, skills + emot + perf + part)
 
 ### Test sleep vs total engagement
-ggplot(df[-c(33), ], aes(x = total.b, y = total.e)) + 
+ggplot(df[-c(33), ], aes(x = total.b, y = total.eng)) + 
   geom_point() + 
   geom_smooth(method = "lm")
 
@@ -635,14 +635,13 @@ summary(sleepveng)
 
 ##########################################################################
 
-### Test relationship between academic engagement and exercise
+### Test relationship between academic engagement and exercise using linear model ----
 ### First calculate the total exercise score using weighted sum
 df$total.e <- with(df, 9*e195 + 6*e196 + 3*e197)
 
 ggplot(df[-33, ], aes(x = total.e, y = skills)) + 
   geom_point() + 
   geom_smooth(method = "lm")
-
 
 ### Test Exercise vs skills
 sleepvskills <- lm(skills ~ total.e, data = df[-33, ])
@@ -686,4 +685,160 @@ exerciseveng <- lm(total.eng ~ total.e, data = df[-33, ])
 plot(exerciseveng)
 summary(exerciseveng)
 
+#################################################################
 
+### First calculate the total exercise score using weighted sum
+df$total.e <- with(df, 9*e195 + 6*e196 + 3*e197)
+
+
+#Simple plot of the relationship between b and e
+ggplot(df, aes(x = total.b, y = total.e)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+# correlation of b and e
+cbe <- cor(df$total.b, df$total.e, use = "pairwise.complete.obs")
+
+#################################################################
+
+# making a new total b data point in the data base df in order to reverse the scores ----
+### as indicated below and then reversing the sleep hygiene data so a high score 
+### indicates good hygiene instead of indicating poor hygiene
+df$newTotal.b <-  1*(52- df$total.b)
+
+####################################################################
+
+#running correlation of sleep hygiene and exercise again with new reverse coded sleep hygiene variable (newTotal.b)
+cbe2 <- cor(df$newTotal.b, df$total.e, use = "pairwise.complete.obs")
+
+
+#####################################################################
+
+#Doing a CFA to check factor loadings on Engagement Questionnaire with my data ----
+
+library(lavaan)
+
+HS.model <- ' Skills =~ m143 + m144 + m145 + m146 + m147 + m148 + m149 + m150 + m151
+              Emotional =~ m152 + m153 + m154 + m155 + m156
+              Part.int =~ m157 + m158 + m159 + m160 + m161 + m162
+              Performance =~ m163 + m164 + m165 '
+
+fit <- cfa(HS.model, data=df, std.lv=TRUE)
+
+summary(fit, fit.measures=TRUE, standardized = TRUE)
+
+#######################################################################
+
+### Test for relationship between engagement and sleep (after reversing sleep data - newTotal.b) using correlation instead of linear model ----
+
+df$total.eng <- with(df, skills + emot + perf + part)
+
+### Should remove 33 as it has high leverage as an outlier: could use: dflim <- df[-33, ] to remove it from the whole data set or eliminate it in each individual analysis(follow each data point with [-33}.  I will eliminate it individually for now and then change previous analysis if I need to. Actually may decide to leave it in since it may theoretically fit the model: low skills, bad sleep hygiene, high stress
+
+#Simple plot of the relationship between sleep (newTotal.b) and total engagement (total.eng)
+ggplot(df[-c(33), ], aes(x = newTotal.b, y = total.eng)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+# correlation of b and m (with item #33 removed)
+cbm2 <- cor(df$newTotal.b[-33], df$total.eng[-33], use = "pairwise.complete.obs")
+
+# correlation of b and m
+cbm <- cor(df$newTotal.b, df$total.eng, use = "pairwise.complete.obs")
+
+### Test sleep vs skills - correlation
+ggplot(df[-33, ], aes(x = newTotal.b, y = skills)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+cbskills <- cor(df$newTotal.b, df$skills, use = "pairwise.complete.obs")
+
+#with 33 removed
+cbskills2 <- cor(df$newTotal.b[-33], df$skills[-33], use = "pairwise.complete.obs")
+
+### Test sleep vs emot
+ggplot(df, aes(x = newTotal.b, y = emot)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+cbemot <- cor(df$newTotal.b, df$emot, use = "pairwise.complete.obs")
+
+#with item #33 removed
+cbemot2 <- cor(df$newTotal.b[-33], df$emot[-33], use = "pairwise.complete.obs")
+
+### Test sleep vs perf
+ggplot(df[-c(33), ], aes(x = newTotal.b, y = perf)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+# May want to remove observation 183 because it is a low outlier
+cbperf <- cor(df$newTotal.b, df$perf, use = "pairwise.complete.obs")
+
+#with item 33 removed
+cbperf2 <- cor(df$newTotal.b[-c(33)], df$perf[-c(33)], use = "pairwise.complete.obs")
+
+### Test sleep vs part
+ggplot(df[-c(33), ], aes(x = newTotal.b, y = part)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+cbpart <- cor(df$newTotal.b, df$part, use = "pairwise.complete.obs")
+
+#with item #33 removed
+cbpart2 <- cor(df$newTotal.b[-33], df$part[-33], use = "pairwise.complete.obs")
+
+
+##########################################################################
+
+### Test relationship between academic engagement and exercise using correlation versus linear model ----
+### First calculate the total exercise score using weighted sum
+df$total.e <- with(df, 9*e195 + 6*e196 + 3*e197)
+
+### Test Exercise vs skills - correlation
+ggplot(df[-33, ], aes(x = total.e, y = skills)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+ceskills <- cor(df$total.e, df$skills, use = "pairwise.complete.obs")
+
+#with no item33
+ceskills2 <- cor(df$total.e[-33], df$skills[-33], use = "pairwise.complete.obs")
+
+### Test exercise vs emot
+ggplot(df, aes(x = total.e, y = emot)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+ceemot <- cor(df$total.e, df$emot, use = "pairwise.complete.obs")
+
+#with no item 33
+ceemot2 <- cor(df$total.e[-33], df$emot[-33], use = "pairwise.complete.obs")
+
+### Test exercise vs perf
+ggplot(df[-c(33), ], aes(x = total.e, y = perf)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+ceperf <- cor(df$total.e, df$perf, use = "pairwise.complete.obs")
+
+#with no item 33
+ceperf2 <- cor(df$total.e[-33], df$perf[-33], use = "pairwise.complete.obs")
+
+### Test exercise vs part ----
+ggplot(df[-c(33), ], aes(x = total.e, y = part)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+cepart <- cor(df$total.e, df$part, use = "pairwise.complete.obs")
+
+#with no item 33
+cepart2 <- cor(df$total.e[-33], df$part[-33], use = "pairwise.complete.obs")
+
+### Test exercise vs total engagement
+ggplot(df[-c(33), ], aes(x = total.e, y = total.eng)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+cem <- cor(df$total.e[-33], df$total.eng[-33], use = "pairwise.complete.obs")
+
+#################################################################
