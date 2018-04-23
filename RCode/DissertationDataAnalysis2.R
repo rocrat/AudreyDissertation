@@ -3,70 +3,16 @@ library(reshape2)
 library(plyr)
 library(dplyr)
 library(ggplot2)
+library(cowplot)
 
 df <- as.data.set(spss.system.file("./Rcode/Data/College coping data (complete).sav"))
 df <- as.data.frame(df)
 
 #reshape to long form
 df$ID <- rownames(df)
-dfl <- melt(df, id = c("ID", "class", "ethnicity", "gender", "age"))
-
-#just s, b and m (s is stress, b is sleep hygiene, and m is academic engagement)
-dfl.bm <- dfl[which(grepl("s|b|m", dfl$variable)), ]
-
-#Create vartype variable indicating the type of variable by pulling the first letter
-#from the variable name
-dfl.bm$vartype <- gsub("^(\\w{1})\\d+$", "\\1", dfl.bm$variable)
-
-#create condensed variables by summing over the three variable types respectively
-df.bm.sum <- dfl.bm %>%
-  group_by(ID, class, ethnicity, gender, age, vartype) %>%
-  summarise(total = sum(value, na.rm = TRUE))#Some NA's in the data, you should know what these mean
-
-#reshape to wide format
-df.sbm.w <- reshape(as.data.frame(df.bm.sum), 
-                   timevar = "vartype", 
-                   times = c("s", "b", "m"), 
-                   idvar = c("ID", "class", "ethnicity", "gender", "age"), 
-                   direction = "wide")
-
-#Simple plot of the relationship between B and M
-ggplot(df.sbm.w, aes(x = total.m, y = total.b)) + 
-  geom_point() + 
-  geom_smooth(method = "lm")
-
-#Figure out if I should be using df.sbm.w and why. If not, then shange all these correlations to df (also, I don's think df.sbm.w has exercise so I may need to look into adding it if I use df.sbm.w)
-#Also, change the correlation names to something else if using df.sbm.w because these (csm, etc. are the same names as those used for df)
-
-# correlation of Stress (s) and Engagement (M)
-csm <- cor(df.sbm.w$total.s, df.sbm.w$total.m, use = "pairwise.complete.obs")
-
-# correlation of sleep (B) and Engagement (M)
-cbm <- cor(df.sbm.w$total.b, df.sbm.w$total.m, use = "pairwise.complete.obs")
-
-# correlation of Stress (s) and Sleep (b)
-csb <- cor(df.sbm.w$total.s, df.sbm.w$total.b, use = "pairwise.complete.obs")
-
-#The exercise analyses might not work since df.sbm.w may not include exercise as a variable.  Figure out why I created this data frame in the first place to see if that is the one I should be using
-# correlation of sleep (B) and Exercise (e)
-cbe <- cor(df.sbm.w$total.b, df.sbm.w$total.e, use = "pairwise.complete.obs")
-
-# correlation of Stress (s) and exercise (e)
-cse <- cor(df.sbm.w$total.s, df.sbm.w$total.e, use = "pairwise.complete.obs")
-
-# correlation of engagement (m) and Exercise (e)
-cme <- cor(df.sbm.w$total.m, df.sbm.w$total.e, use = "pairwise.complete.obs")
-
-# Basic model with interaction of sleep on stress and engagement
-m1 <- lm(total.m ~ total.s + total.b + total.s:total.b, data = df.sbm.w)
-#Create summary of the model for evaluation
-sm1 <- summary(m1)
-# View the summary
-print(sm1) #nothing significant
-
 
 #remember, you can learn more about a function by typing a ? before the function:
-?quantile
+# ?quantile
 
 ###################################################################################################
 
@@ -86,13 +32,18 @@ df$total.b <- rowSums(df[, which(grepl("^b\\d{1,2}" , names(df)))], na.rm = TRUE
 
 #Simple plot of the relationship between stress (s) and skills AE
 ggplot(df, aes(x = total.s, y = skills)) + 
-  geom_point() + 
-  geom_smooth(method = "lm")
+  # geom_point() + 
+  geom_smooth(method = "lm") +
+  geom_text(aes(label = ID)) # ID 33 is an outlier here (shows up in cooks distance too)
+
 
 # correlation of variables with academic eng factors
+cbskills_noOutlier <- cor(df$total.b[-33], df$skills[-33], use = "pairwise.complete.obs")
+# the no-outlier version has higher correlation
 cbskills <- cor(df$total.b, df$skills, use = "pairwise.complete.obs")
 
-# Factored (academic engagement) model with interaction
+
+# Factored (academic engagement) model with interaction ----
 m4b <- lm(emot ~ total.s + total.b + total.s:total.b, data = df)
 #Create summary of the model for evaluation
 sm4b <- summary(m4b)
@@ -103,7 +54,7 @@ m3b <- lm(skills ~ total.s + total.b + total.s:total.b, data = df)
 #Create summary of the model for evaluation
 sm3b <- summary(m3b)
 # View the summary
-print(sm3b) #nothing significant
+print(sm3b) ## ID 33 has a lot of leverage (use: plot(m3b))
 
 m5b <- lm(part ~ total.s + total.b + total.s:total.b, data = df)
 #Create summary of the model for evaluation
@@ -122,22 +73,20 @@ write.csv(sm3$coef, file = "Model3Results.csv")
 
 ############################################################################################
 
-#creating plot to determine interaction effect on m3:
+#creating plot to determine interaction effect on m3: ----
 
 ggplot(df, aes(y = skills, x = total.b)) + #This calls the data and sets the x and y axes
   geom_point(aes(size = total.s)) + #This adds points to the plot
   ylab("Skills") + #These change the labels of the x and y axes (by default they get the name of your variable which may not be very useful to an outside reader)
   xlab("Total.b") + #replace this with something intelligible
-  scale_size_continuous("Total.s") +#this changes the name of the size legend, make it make sense
-  theme_bw() #This adds a simplified theme 
+  scale_size_continuous("Total.s") #this changes the name of the size legend, make it make sense
 
 #Try again with color instead of size
 ggplot(df, aes(y = skills, x = total.b)) + #This calls the data and sets the x and y axes
   geom_point(aes(color = total.s), size = 2) + #This adds points to the plot with the color mapped to total.s
   ylab("Skills") + #These change the labels of the x and y axes (by default they get the name of your variable which may not be very useful to an outside reader)
   xlab("Total.b") + #replace this with something intelligible
-  scale_color_continuous("Total.s") +#this changes the name of the size legend, make it make sense
-  theme_bw() #This adds a simplified theme 
+  scale_color_continuous("Total.s") #this changes the name of the size legend, make it make sense
 
 #Both of these plots indicate to me that the interaction is slightly attenuating
 
@@ -146,26 +95,22 @@ ggplot(df, aes(y = skills, x = total.s)) + #This calls the data and sets the x a
   geom_point(aes(size = total.b)) + #This adds points to the plot
   ylab("Skills") + #These change the labels of the x and y axes (by default they get the name of your variable which may not be very useful to an outside reader)
   xlab("Total.s") + #replace this with something intelligible
-  scale_size_continuous("Total.b") +#this changes the name of the size legend, make it make sense
-  theme_bw() #This adds a simplified theme 
+  scale_size_continuous("Total.b") #this changes the name of the size legend, make it make sense
 
 ggplot(df, aes(y = skills, x = total.s)) + #This calls the data and sets the x and y axes
   geom_point(aes(color = total.b), size = 2) + #This adds points to the plot
   ylab("Skills") + #These change the labels of the x and y axes (by default they get the name of your variable which may not be very useful to an outside reader)
   xlab("Total.s") + #replace this with something intelligible
-  scale_color_continuous("Total.b") +#this changes the name of the size legend, make it make sense
-  theme_bw() #This adds a simplified theme 
+  scale_color_continuous("Total.b") #this changes the name of the size legend, make it make sense
 
 
 #Sometimes is it helpful to have the response as the third dimension
 ggplot(df, aes(y = total.b, x = total.s)) + 
-  geom_point(aes(size = skills)) +
-  theme_bw()
+  geom_point(aes(size = skills)) 
 
 
 ggplot(df, aes(y = total.b, x = total.s)) + 
-  geom_point(aes(color = skills), size = 2) +
-  theme_bw()
+  geom_point(aes(color = skills), size = 2) 
 
 #Hmmm, there is an outlying value that may be driving the attenuation.  
 #I am suspicious that the interaction might dissappear or change signs if this data point is removed.
@@ -189,7 +134,7 @@ summary(m3New)
 predictM3 <- function(total.s, total.b){
   skills <- -28.72 + 0.340955*total.s + 1.032546*total.b + -0.007551*total.s*total.b
   return(skills)
-}
+} #there is also a predict() function in R that does this for any model
 
 #find the range of values
 summary(df[, c("total.s", "total.b", "skills")])
@@ -218,14 +163,14 @@ print(sm4e)
 
 m3e <- lm(skills ~ total.s + total.e + total.s:total.e, data = df)
 sm3e <- summary(m3e)
-print(sm3e)
+print(sm3e) #obs 33 poses issue here
 
 m5e <- lm(part ~ total.s + total.e + total.s:total.e, data = df)
-sm5e <- summary(m5e)
+sm5e <- summary(m5e) # obs 156 poses issue here
 print(sm5e)
 
 m6e <- lm(perf ~ total.s + total.e + total.s:total.e, data = df)
-sm6e <- summary(m6e)
+sm6e <- summary(m6e) ## 33 and 183 pose issues here
 print(sm6e)
 
 
@@ -233,7 +178,7 @@ df$total.m <-  apply(df[, which(grepl("^m.*", names(df)))], 1, sum,  na.rm = TRU
 
 #Simple plot of the relationship between s and e
 ggplot(df, aes(x = total.s, y = total.e)) + 
-  geom_point() + 
+  geom_text(aes(label = ID)) + 
   geom_smooth(method = "lm")
 
 # correlation of s and e
@@ -242,7 +187,7 @@ cse <- cor(df$total.s, df$total.e, use = "pairwise.complete.obs")
 
 #Simple plot of the relationship between s and m
 ggplot(df, aes(x = total.s, y = total.m)) + 
-  geom_point() + 
+  geom_text(aes(label = ID)) + 
   geom_smooth(method = "lm")
 
 # correlation of s and m
@@ -251,11 +196,12 @@ csm <- cor(df$total.s, df$total.m, use = "pairwise.complete.obs")
 
 #Simple plot of the relationship between e and m
 ggplot(df, aes(x = total.e, y = total.m)) + 
-  geom_point() + 
+  geom_text(aes(label = ID)) + 
   geom_smooth(method = "lm")
 
 # correlation of e and m
 cem <- cor(df$total.e, df$total.m, use = "pairwise.complete.obs")
+cem_noOutlier <- cor(df$total.e[-33], df$total.m[-33], use = "pairwise.complete.obs")
 
 ####################################################################
 
@@ -396,7 +342,6 @@ glh.test(mageskl,
 ###############################################################################
 
 #Running contrast code/general linear hypothesis testing for age and AE emot----
-library(gmodels)
 mageemot <- lm(emot ~ -1 + age, data = df)
 summary(mageemot)
 
@@ -457,7 +402,6 @@ glh.test(mageemot,
 ##########################################################################
 
 #Running contrast code/general linear hypothesis testing for age and AE part ----
-library(gmodels)
 magepart <- lm(part ~ -1 + age, data = df)
 summary(magepart)
 
@@ -584,7 +528,8 @@ ggplot(df[-33, ], aes(x = total.b, y = skills)) +
   geom_smooth(method = "lm")
 
 sleepvskills <- lm(skills ~ total.b, data = df)
-plot(sleepvskills)
+plot(sleepvskills) ## 33 is a real issue here
+
 
 ### Definitely should remove 33 as it has high leverage as an outlier
 sleepvskills <- lm(skills ~ total.b, data = df[-33, ])
@@ -606,7 +551,7 @@ ggplot(df[-c(33, 183), ], aes(x = total.b, y = perf)) +
   geom_smooth(method = "lm")
 
 sleepvperf <- lm(perf ~ total.b, data = df[-33, ])
-plot(sleepvperf)
+plot(sleepvperf) #183 is an issue here
 summary(sleepvperf)
 
 ### Test sleep vs part
@@ -633,9 +578,7 @@ summary(sleepveng)
 
 ##########################################################################
 
-### Test relationship between academic engagement and exercise using linear model ---- (hypothesis 4)
-### First calculate the total exercise score using weighted sum
-df$total.e <- with(df, 9*e195 + 6*e196 + 3*e197)
+### Test relationship between academic engagement and exercise using linear model (hypothesis 4) ---- 
 
 ggplot(df[-33, ], aes(x = total.e, y = skills)) + 
   geom_point() + 
@@ -684,9 +627,6 @@ plot(exerciseveng)
 summary(exerciseveng)
 
 #################################################################
-
-### First calculate the total exercise score using weighted sum
-df$total.e <- with(df, 9*e195 + 6*e196 + 3*e197)
 
 
 #Simple plot of the relationship between b and e
@@ -786,8 +726,6 @@ cbpart2 <- cor(df$total.b[-33], df$part[-33], use = "pairwise.complete.obs")
 ##########################################################################
 
 ### Test relationship between academic engagement and exercise using correlation versus linear model (hypothesis 4) ----
-### First calculate the total exercise score using weighted sum
-df$total.e <- with(df, 9*e195 + 6*e196 + 3*e197)
 
 ### Test Exercise vs skills - correlation
 ggplot(df[-33, ], aes(x = total.e, y = skills)) + 
@@ -834,38 +772,34 @@ ggplot(df[-c(33), ], aes(x = total.e, y = total.eng)) +
   geom_point() + 
   geom_smooth(method = "lm")
 
-cem <- cor(df$total.e[-33], df$total.eng[-33], use = "pairwise.complete.obs")
+ceng <- cor(df$total.e[-33], df$total.eng[-33], use = "pairwise.complete.obs")
 
 #############################################################################
 ### Test moderation of exercise on relationship between exercise and academic engagement using linear model/multiple regression (equation from article) (hypothesis 5) ----
-### First calculate the total exercise score using weighted sum
-df$total.e <- with(df, 9*e195 + 6*e196 + 3*e197)
 
-ggplot(df[-33, ], aes(x = total.e, y = m)) + 
-  geom_point() + 
-  geom_smooth(method = "lm")
 
-###Interaction of exercise with total engagement (eng)
+###Effect of exercise on total engagement (eng)
 exerciseveng <- lm(total.eng ~ total.e, data = df[-33, ])
 plot(exerciseveng)
 summary(exerciseveng)
 
-###Interaction of exercise with skills eng
+###Effect of exercise on skills eng
 exercisevskills <- lm(skills ~ total.e, data = df[-33, ])
 plot(exercisevskills)
 summary(exercisevskills)
 
-###Interaction of exercise with emot eng
+###Effect of exercise on emot eng
 exercisevemot <- lm(emot ~ total.e, data = df[-33, ])
 plot(exercisevemot)
 summary(exercisevemot)
 
-###Interaction of exercise with Part eng
+###Effect of exercise on Part eng
 exercisevpart <- lm(part ~ total.e, data = df[-33, ])
 plot(exercisevpart)
 summary(exercisevpart)
 
-###Interaction of exercise with Perf eng
+###Effect of exercise on Perf eng
 exercisevperf <- lm(perf ~ total.e, data = df[-33, ])
 plot(exercisevperf)
 summary(exercisevperf)
+
