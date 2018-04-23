@@ -31,51 +31,42 @@ df.sbm.w <- reshape(as.data.frame(df.bm.sum),
                    direction = "wide")
 
 #Simple plot of the relationship between B and M
-ggplot(df.sbm.w, aes(x = total.s, y = total.b)) + 
+ggplot(df.sbm.w, aes(x = total.m, y = total.b)) + 
   geom_point() + 
   geom_smooth(method = "lm")
 
+#Figure out if I should be using df.sbm.w and why. If not, then shange all these correlations to df (also, I don's think df.sbm.w has exercise so I may need to look into adding it if I use df.sbm.w)
+#Also, change the correlation names to something else if using df.sbm.w because these (csm, etc. are the same names as those used for df)
+
 # correlation of Stress (s) and Engagement (M)
-csm <- cor(df.sbm.w$total.s, df.sbm.w$total.b, use = "pairwise.complete.obs")
+csm <- cor(df.sbm.w$total.s, df.sbm.w$total.m, use = "pairwise.complete.obs")
 
-# correlation of B and M
-cbm <- cor(df.sbm.w$total.m, df.sbm.w$total.b, use = "pairwise.complete.obs")
+# correlation of sleep (B) and Engagement (M)
+cbm <- cor(df.sbm.w$total.b, df.sbm.w$total.m, use = "pairwise.complete.obs")
 
-# Basic model with interaction
+# correlation of Stress (s) and Sleep (b)
+csb <- cor(df.sbm.w$total.s, df.sbm.w$total.b, use = "pairwise.complete.obs")
+
+#The exercise analyses might not work since df.sbm.w may not include exercise as a variable.  Figure out why I created this data frame in the first place to see if that is the one I should be using
+# correlation of sleep (B) and Exercise (e)
+cbe <- cor(df.sbm.w$total.b, df.sbm.w$total.e, use = "pairwise.complete.obs")
+
+# correlation of Stress (s) and exercise (e)
+cse <- cor(df.sbm.w$total.s, df.sbm.w$total.e, use = "pairwise.complete.obs")
+
+# correlation of engagement (m) and Exercise (e)
+cme <- cor(df.sbm.w$total.m, df.sbm.w$total.e, use = "pairwise.complete.obs")
+
+# Basic model with interaction of sleep on stress and engagement
 m1 <- lm(total.m ~ total.s + total.b + total.s:total.b, data = df.sbm.w)
 #Create summary of the model for evaluation
 sm1 <- summary(m1)
 # View the summary
 print(sm1) #nothing significant
 
-#View histogram of B to see where potential cutpoints might be
-hist(df.bm.w$total.b)
-
-#looks pretty normal, can use quartiles to create 4 categories
-cuts <- quantile(x = df.sbm.w$total.b, probs = c(0.33, 0.66))
 
 #remember, you can learn more about a function by typing a ? before the function:
 ?quantile
-
-#Create a new variable with the cuts using logic
-df.sbm.w$bCat <- with(df.sbm.w, ifelse(total.b < cuts[1], "Low",
-                       ifelse(total.b >= cuts[1] & total.b < cuts[2], "Moderate",
-                              ifelse(total.b >= cuts[2], "High", NA))))
-
-#set the factor levels so we can control which category is the "reference"
-df.sbm.w$bCat <- factor(df.sbm.w$bCat, levels = c("Low", "Moderate", "High"))
-
-#New model with dichotomized  B variable
-m2 <- lm(total.m ~ total.s + bCat + total.s:bCat, data = df.sbm.w)
-#Create summary of the model for evaluation
-sm2 <- summary(m2)
-# View the summary
-print(sm2) #the highest category of B has a significant difference in mean S than the lowest
- # the second highest is 'almost' significant ;)
-
-#visualize the results
-ggplot(df.bm.w, aes(x = bCat, y = total.s)) + 
-  geom_boxplot()
 
 ###################################################################################################
 
@@ -93,9 +84,8 @@ df$total.s <- rowSums(df[, which(grepl("^s\\d{1,2}" , names(df)))], na.rm = TRUE
 df$total.b <- rowSums(df[, which(grepl("^b\\d{1,2}" , names(df)))], na.rm = TRUE)
 
 
-
-#Simple plot of the relationship between s and skills
-ggplot(df, aes(x = total.b, y = perf)) + 
+#Simple plot of the relationship between stress (s) and skills AE
+ggplot(df, aes(x = total.s, y = skills)) + 
   geom_point() + 
   geom_smooth(method = "lm")
 
@@ -103,29 +93,29 @@ ggplot(df, aes(x = total.b, y = perf)) +
 cbskills <- cor(df$total.b, df$skills, use = "pairwise.complete.obs")
 
 # Factored (academic engagement) model with interaction
-m4 <- lm(emot ~ total.s + total.b + total.s:total.b, data = df)
+m4b <- lm(emot ~ total.s + total.b + total.s:total.b, data = df)
 #Create summary of the model for evaluation
-sm4 <- summary(m4)
+sm4b <- summary(m4b)
 # View the summary
-print(sm4) #nothing significant
+print(sm4b) #nothing significant
 
-m3 <- lm(skills ~ total.s + total.b + total.s:total.b, data = df)
+m3b <- lm(skills ~ total.s + total.b + total.s:total.b, data = df)
 #Create summary of the model for evaluation
-sm3 <- summary(m3)
+sm3b <- summary(m3b)
 # View the summary
-print(sm3) #nothing significant
+print(sm3b) #nothing significant
 
-m5 <- lm(part ~ total.s + total.b + total.s:total.b, data = df)
+m5b <- lm(part ~ total.s + total.b + total.s:total.b, data = df)
 #Create summary of the model for evaluation
-sm5 <- summary(m5)
+sm5b <- summary(m5b)
 # View the summary
-print(sm5) #nothing significant
+print(sm5b) #nothing significant
 
-m6 <- lm(perf ~ total.s + total.b + total.s:total.b, data = df)
+m6b <- lm(perf ~ total.s + total.b + total.s:total.b, data = df)
 #Create summary of the model for evaluation
-sm6 <- summary(m6)
+sm6b <- summary(m6b)
 # View the summary
-print(sm6) #nothing significant
+print(sm6b) #nothing significant
 
 
 write.csv(sm3$coef, file = "Model3Results.csv")
@@ -213,7 +203,11 @@ df[, 33]
 ############################################################################################
 #Interaction effect with exercise ----
 
-df$total.e <- df$e195+df$e196+df$e197
+#Create total.e (this is not the weighted sum value - run weighted sum and do relavent analyses again)(rename total.e with something?- total.e.notweighted)
+df$total.e.notweighted <- df$e195+df$e196+df$e197
+
+### First calculate the total exercise score using weighted sum 
+df$total.e <- with(df, 9*e195 + 6*e196 + 3*e197)
 
 # Factored (academic engagement) model with interaction for exercise
 m4e <- lm(emot ~ total.s + total.e + total.s:total.e, data = df)
@@ -624,6 +618,7 @@ sleepvpart <- lm(part ~ total.b, data = df[-33, ])
 plot(sleepvpart)
 summary(sleepvpart)
 
+#Check if I need this or is it redundant with total.m?
 df$total.eng <- with(df, skills + emot + perf + part)
 
 ### Test sleep vs total engagement
@@ -638,7 +633,7 @@ summary(sleepveng)
 
 ##########################################################################
 
-### Test relationship between academic engagement and exercise using linear model ----
+### Test relationship between academic engagement and exercise using linear model ---- (hypothesis 4)
 ### First calculate the total exercise score using weighted sum
 df$total.e <- with(df, 9*e195 + 6*e196 + 3*e197)
 
@@ -704,16 +699,13 @@ cbe <- cor(df$total.b, df$total.e, use = "pairwise.complete.obs")
 
 #################################################################
 
-# making a new total b data point in the data base df in order to reverse the scores ----
+# Not needed based on the way the data was collected - making a new total b data point in the data base df in order to reverse the scores ----
 ### as indicated below and then reversing the sleep hygiene data so a high score 
 ### indicates good hygiene instead of indicating poor hygiene
-df$newTotal.b <-  1*(52- df$total.b)
 
 ####################################################################
 
-#running correlation of sleep hygiene and exercise again with new reverse coded sleep hygiene variable (newTotal.b)
-cbe2 <- cor(df$newTotal.b, df$total.e, use = "pairwise.complete.obs")
-
+#Not needed (see above) - running correlation of sleep hygiene and exercise again with new reverse coded sleep hygiene variable (newTotal.b)
 
 #####################################################################
 
@@ -732,68 +724,68 @@ summary(fit, fit.measures=TRUE, standardized = TRUE)
 
 #######################################################################
 
-### Test for relationship between engagement and sleep (after reversing sleep data - newTotal.b) using correlation instead of linear model ----
+### Test for relationship between engagement and sleep using correlation instead of linear model (hypothesis 2) ----
 
 df$total.eng <- with(df, skills + emot + perf + part)
 
 ### Should remove 33 as it has high leverage as an outlier: could use: dflim <- df[-33, ] to remove it from the whole data set or eliminate it in each individual analysis(follow each data point with [-33}.  I will eliminate it individually for now and then change previous analysis if I need to. Actually may decide to leave it in since it may theoretically fit the model: low skills, bad sleep hygiene, high stress
 
-#Simple plot of the relationship between sleep (newTotal.b) and total engagement (total.eng)
-ggplot(df[-c(33), ], aes(x = newTotal.b, y = total.eng)) + 
+#Simple plot of the relationship between sleep and total engagement (total.eng)
+ggplot(df[-c(33), ], aes(x = total.b, y = total.eng)) + 
   geom_point() + 
   geom_smooth(method = "lm")
 
 # correlation of b and m (with item #33 removed)
-cbm2 <- cor(df$newTotal.b[-33], df$total.eng[-33], use = "pairwise.complete.obs")
+cbm2 <- cor(df$total.b[-33], df$total.eng[-33], use = "pairwise.complete.obs")
 
 # correlation of b and m
-cbm <- cor(df$newTotal.b, df$total.eng, use = "pairwise.complete.obs")
+cbm <- cor(df$total.b, df$total.eng, use = "pairwise.complete.obs")
 
 ### Test sleep vs skills - correlation
-ggplot(df[-33, ], aes(x = newTotal.b, y = skills)) + 
+ggplot(df[-33, ], aes(x = total.b, y = skills)) + 
   geom_point() + 
   geom_smooth(method = "lm")
 
-cbskills <- cor(df$newTotal.b, df$skills, use = "pairwise.complete.obs")
+cbskills <- cor(df$total.b, df$skills, use = "pairwise.complete.obs")
 
 #with 33 removed
-cbskills2 <- cor(df$newTotal.b[-33], df$skills[-33], use = "pairwise.complete.obs")
+cbskills2 <- cor(df$total.b[-33], df$skills[-33], use = "pairwise.complete.obs")
 
 ### Test sleep vs emot
-ggplot(df, aes(x = newTotal.b, y = emot)) + 
+ggplot(df, aes(x = total.b, y = emot)) + 
   geom_point() + 
   geom_smooth(method = "lm")
 
-cbemot <- cor(df$newTotal.b, df$emot, use = "pairwise.complete.obs")
+cbemot <- cor(df$total.b, df$emot, use = "pairwise.complete.obs")
 
 #with item #33 removed
-cbemot2 <- cor(df$newTotal.b[-33], df$emot[-33], use = "pairwise.complete.obs")
+cbemot2 <- cor(df$total.b[-33], df$emot[-33], use = "pairwise.complete.obs")
 
 ### Test sleep vs perf
-ggplot(df[-c(33), ], aes(x = newTotal.b, y = perf)) + 
+ggplot(df[-c(33), ], aes(x = total.b, y = perf)) + 
   geom_point() + 
   geom_smooth(method = "lm")
 
-# May want to remove observation 183 because it is a low outlier
-cbperf <- cor(df$newTotal.b, df$perf, use = "pairwise.complete.obs")
+# May want to remove observation 183 because it is a low outlier (check again but I don't think so)
+cbperf <- cor(df$total.b, df$perf, use = "pairwise.complete.obs")
 
 #with item 33 removed
-cbperf2 <- cor(df$newTotal.b[-c(33)], df$perf[-c(33)], use = "pairwise.complete.obs")
+cbperf2 <- cor(df$total.b[-c(33)], df$perf[-c(33)], use = "pairwise.complete.obs")
 
 ### Test sleep vs part
-ggplot(df[-c(33), ], aes(x = newTotal.b, y = part)) + 
+ggplot(df[-c(33), ], aes(x = total.b, y = part)) + 
   geom_point() + 
   geom_smooth(method = "lm")
 
-cbpart <- cor(df$newTotal.b, df$part, use = "pairwise.complete.obs")
+cbpart <- cor(df$total.b, df$part, use = "pairwise.complete.obs")
 
 #with item #33 removed
-cbpart2 <- cor(df$newTotal.b[-33], df$part[-33], use = "pairwise.complete.obs")
+cbpart2 <- cor(df$total.b[-33], df$part[-33], use = "pairwise.complete.obs")
 
 
 ##########################################################################
 
-### Test relationship between academic engagement and exercise using correlation versus linear model ----
+### Test relationship between academic engagement and exercise using correlation versus linear model (hypothesis 4) ----
 ### First calculate the total exercise score using weighted sum
 df$total.e <- with(df, 9*e195 + 6*e196 + 3*e197)
 
@@ -845,7 +837,7 @@ ggplot(df[-c(33), ], aes(x = total.e, y = total.eng)) +
 cem <- cor(df$total.e[-33], df$total.eng[-33], use = "pairwise.complete.obs")
 
 #############################################################################
-### Test moderation of exercise on relationship between exercise and academic engagement using linear model/multiple regression (equation from article) ----
+### Test moderation of exercise on relationship between exercise and academic engagement using linear model/multiple regression (equation from article) (hypothesis 5) ----
 ### First calculate the total exercise score using weighted sum
 df$total.e <- with(df, 9*e195 + 6*e196 + 3*e197)
 
@@ -853,7 +845,27 @@ ggplot(df[-33, ], aes(x = total.e, y = m)) +
   geom_point() + 
   geom_smooth(method = "lm")
 
-###Interaction of exercise
-sleepvskills <- lm(skills ~ total.e, data = df[-33, ])
-plot(sleepvskills)
-summary(sleepvskills)
+###Interaction of exercise with total engagement (eng)
+exerciseveng <- lm(total.eng ~ total.e, data = df[-33, ])
+plot(exerciseveng)
+summary(exerciseveng)
+
+###Interaction of exercise with skills eng
+exercisevskills <- lm(skills ~ total.e, data = df[-33, ])
+plot(exercisevskills)
+summary(exercisevskills)
+
+###Interaction of exercise with emot eng
+exercisevemot <- lm(emot ~ total.e, data = df[-33, ])
+plot(exercisevemot)
+summary(exercisevemot)
+
+###Interaction of exercise with Part eng
+exercisevpart <- lm(part ~ total.e, data = df[-33, ])
+plot(exercisevpart)
+summary(exercisevpart)
+
+###Interaction of exercise with Perf eng
+exercisevperf <- lm(perf ~ total.e, data = df[-33, ])
+plot(exercisevperf)
+summary(exercisevperf)
