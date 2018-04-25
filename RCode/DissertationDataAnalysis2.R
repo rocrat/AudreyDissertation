@@ -811,6 +811,7 @@ cstressvsleep <- cor(df$total.stress, df$total.sleep, use = "pairwise.complete.o
 cstressvsleep2 <- cor(df$total.stress[-33], df$total.sleep[-33], use = "pairwise.complete.obs")
 #0.323
 
+
 #Third step - Regress the dependent variable on the mediator and independent variable
 
 engstresssleep <- lm(total.eng ~ total.stress + total.sleep, data = df[-33, ])
@@ -1024,9 +1025,105 @@ print(seng6exercise)
 
 ####################################################################
 
-# Hypothesis 6 - Hierarchical influence of variables in AE
+# Hypothesis 6 - Predictive model of influence of variables on AE
 
 #See equation from notes
+predicteng <- lm(total.eng ~ total.stress*total.sleep*total.exercise, data = df[-33,])
+spredicteng <- summary(predicteng)
+print(spredicteng)
+
+# with demographic variable of age
+#You may want to set the reference category though, by default it is the name of the category which comes first alpha-numerically.
+#df$age <- factor(df$age, levels = c("level1", :"level2", etc.))
+predicteng <- lm(total.eng ~ age*total.stress*total.sleep*total.exercise, data = df[-33,])
+spredicteng <- summary(predicteng)
+print(spredicteng)
+
+predictskills <- lm(total.skills ~ total.stress + total. sleep + total.exercise + total.stress:total.sleep + total.stress:total.exercise + total.stress:total.sleep:total.exercise, data = df[-33,])
+spredictskills <- summary(predictskills)
+print(spredictskills)
+
+###Random Forest Code to look at importance of each variable
+### Set up environment ----
+
+library(memisc)
+library(reshape2)
+library(tidyverse)
+library(cowplot)
+library(randomForest)
+
+
+### Read in data ----
+df <- as.data.set(spss.system.file("./Rcode/Data/College coping data (complete).sav"))
+df <- as.data.frame(df)
+
+#Create case ID variable
+df$ID <- rownames(df)
+
+#Subset data into training and testing sets ----
+set.seed(1014)
+trainIndex <- sample(1:nrow(df), #Sample the row indices
+                     size = floor((2/3)*nrow(df)), #take 2/3rds for the training set
+                     replace = FALSE) #ensure the index is unique
+
+dftrain <- df[trainIndex, ]
+
+dftest <- df[-trainIndex, ]
+
+### fit random forest using different numbers of variables in each tree ----
+set.seed(2010)
+
+# Create containers for the results
+rfError <- data.frame(outBag_error = rep(NA, 6),
+                      pred_error = rep(NA, 6),
+                      mtry = 1:6)
+# Loop thorugh each possible number of predictors in each tree and 
+# calculate performance of the model
+for(mtry in rfError$mtry){
+  rftmp <- randomForest(total.eng ~ total.sleep +
+                          total.stress + 
+                          total.exercise + 
+                          ethnicity + 
+                          gender + 
+                          age, 
+                        mtry = mtry,
+                        data = dftrain, 
+                        na.action = na.omit)
+  
+  #Out of bag performance
+  rfError$outBag_error[mtry] <- rftmp$mse[500]
+  
+  # test set performance
+  pred <- predict(rftmp, dftest) #Get predicted values
+  rfError$pred_error[mtry] <- mean((dftest$total.eng - pred)^2) #calculate MSE
+}
+
+## Long form for plotting two lines
+rfErrorl <- gather(rfError, Error_type, MSE, -mtry)
+
+ggplot(rfErrorl, aes(x = mtry, y = MSE)) + 
+  geom_point(aes(color = Error_type)) +
+  geom_line(aes(color = Error_type))
+# the fact that the optimal number of vars for each split is 1 means that there are no interactions
+
+
+#Select number of variables (mtry) based on minimum MSE of prediction and fit on full data ----
+
+rf1 <- randomForest(total.eng ~ total.sleep +
+                      total.stress + 
+                      total.exercise + 
+                      ethnicity + 
+                      gender + 
+                      age, 
+                    mtry = 1,
+                    data = df, 
+                    na.action = na.omit)
+
+#check for error convergence
+plot(rf1) 
+
+### This gives the relative importance of each variable
+rf1$importance
 
 
 ################################################################################
