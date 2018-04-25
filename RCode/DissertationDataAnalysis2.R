@@ -47,6 +47,10 @@ df$total.eng <-  apply(df[, which(grepl("^m.*", names(df)))], 1, sum,  na.rm = T
 #or with factor loadings - check article and include in methods if using with factor loadings
 df$total.eng <- with(df, skills + emot + perf + part)
 
+#Create total.exercise (this is not the weighted sum value - run weighted sum and do relavent analyses again)(rename total.e with something?- total.e.notweighted)
+df$total.exercise.notweighted <- df$e195+df$e196+df$e197
+### First calculate the total exercise score using weighted sum 
+df$total.exercise <- with(df, 9*e195 + 6*e196 + 3*e197)
 
 # Example equation of correlation of variables with academic eng factors (correlation of sleep hygiene and skills eng)
 #csleep-skills_noOutlier <- cor(df$total.sleep[-33], df$skills[-33], use = "pairwise.complete.obs")
@@ -395,8 +399,8 @@ ggplot(df, aes(x = total.stress, y = total.eng)) +
   geom_smooth(method = "lm")
 
 # correlation of stress and eng
-cstress-eng <- cor(df$total.stress, df$total.eng, use = "pairwise.complete.obs")
-cstress-eng_noOutlier <- cor(df$total.stress[-33], df$total.eng[-33], use = "pairwise.complete.obs")
+cstressveng <- cor(df$total.stress, df$total.eng, use = "pairwise.complete.obs")
+cstressveng2 <- cor(df$total.stress[-33], df$total.eng[-33], use = "pairwise.complete.obs")
 
 #Simple plot of the relationship between stress (s) and skills AE
 ggplot(df, aes(x = total.stress, y = skills)) + 
@@ -405,8 +409,8 @@ ggplot(df, aes(x = total.stress, y = skills)) +
   geom_text(aes(label = ID)) # ID 33 is an outlier here (shows up in cooks distance too)
 
 # correlation of stress and skills
-cstress-skills <- cor(df$total.stress, df$skills, use = "pairwise.complete.obs")
-cstress-skills_noOutlier <- cor(df$total.stress[-33], df$skills[-33], use = "pairwise.complete.obs")
+cstressvskills <- cor(df$total.stress, df$skills, use = "pairwise.complete.obs")
+cstressvskills2 <- cor(df$total.stress[-33], df$skills[-33], use = "pairwise.complete.obs")
 
 #Simple plot of the relationship between stress (s) and emot AE
 ggplot(df, aes(x = total.stress, y = emot)) + 
@@ -415,8 +419,8 @@ ggplot(df, aes(x = total.stress, y = emot)) +
   geom_text(aes(label = ID)) 
 
 # correlation of stress and emot
-cstress-emot <- cor(df$total.stress, df$emot, use = "pairwise.complete.obs")
-cstress-emot_noOutlier <- cor(df$total.stress[-33], df$emot[-33], use = "pairwise.complete.obs")
+cstressvemot <- cor(df$total.stress, df$emot, use = "pairwise.complete.obs")
+cstressvemot2 <- cor(df$total.stress[-33], df$emot[-33], use = "pairwise.complete.obs")
 
 #Simple plot of the relationship between stress (s) and part AE
 ggplot(df, aes(x = total.stress, y = part)) + 
@@ -425,8 +429,8 @@ ggplot(df, aes(x = total.stress, y = part)) +
   geom_text(aes(label = ID)) 
 
 # correlation of stress and part
-cstress-part <- cor(df$total.stress, df$part, use = "pairwise.complete.obs")
-cstress-part_noOutlier <- cor(df$total.stress[-33], df$part[-33], use = "pairwise.complete.obs")
+cstressvpart <- cor(df$total.stress, df$part, use = "pairwise.complete.obs")
+cstressvpart2 <- cor(df$total.stress[-33], df$part[-33], use = "pairwise.complete.obs")
 
 #Simple plot of the relationship between stress (s) and perf AE
 ggplot(df, aes(x = total.stress, y = perf)) + 
@@ -435,12 +439,15 @@ ggplot(df, aes(x = total.stress, y = perf)) +
   geom_text(aes(label = ID)) 
 
 # correlation of stress and perf
-cstress-perf <- cor(df$total.stress, df$perf, use = "pairwise.complete.obs")
-cstress-perf_noOutlier <- cor(df$total.stress[-33], df$perf[-33], use = "pairwise.complete.obs")
+cstressvperf <- cor(df$total.stress, df$perf, use = "pairwise.complete.obs")
+cstressvperf2 <- cor(df$total.stress[-33], df$perf[-33], use = "pairwise.complete.obs")
+
+#Correlations of stress with academic engagement show small significance for skills eng. So use skills for this analysis. 0.233
+#Part and Perf were -.126 and .112, emot and total.eng were lower.
 
 ##############################################################################################
 
-# Hypothesis 2
+# Hypothesis 2 - done
 
 # Correlation of sleep hygiene and academic engagement
 
@@ -454,30 +461,30 @@ ggplot(df[-c(33), ], aes(x = total.sleep, y = total.eng)) +
   geom_smooth(method = "lm")
 
 # correlation of sleep and eng (with item #33 removed)
-csleep-eng2 <- cor(df$total.sleep[-33], df$total.eng[-33], use = "pairwise.complete.obs")
+csleepveng2 <- cor(df$total.sleep[-33], df$total.eng[-33], use = "pairwise.complete.obs")
 
 # correlation of sleep and eng
-csleep-eng <- cor(df$total.sleep, df$total.eng, use = "pairwise.complete.obs")
+csleepveng <- cor(df$total.sleep, df$total.eng, use = "pairwise.complete.obs")
 
 ### Test sleep vs skills - correlation
 ggplot(df[-33, ], aes(x = total.sleep, y = skills)) + 
   geom_point() + 
   geom_smooth(method = "lm")
 
-csleep-skills <- cor(df$total.sleep, df$skills, use = "pairwise.complete.obs")
+csleepvskills <- cor(df$total.sleep, df$skills, use = "pairwise.complete.obs")
 
 #with 33 removed
-csleep-skills2 <- cor(df$total.sleep[-33], df$skills[-33], use = "pairwise.complete.obs")
+csleepvskills2 <- cor(df$total.sleep[-33], df$skills[-33], use = "pairwise.complete.obs")
 
 ### Test sleep vs emot
 ggplot(df, aes(x = total.sleep, y = emot)) + 
   geom_point() + 
   geom_smooth(method = "lm")
 
-csleep-emot <- cor(df$total.sleep, df$emot, use = "pairwise.complete.obs")
+csleepvemot <- cor(df$total.sleep, df$emot, use = "pairwise.complete.obs")
 
 #with item #33 removed
-csleep-emot2 <- cor(df$total.sleep[-33], df$emot[-33], use = "pairwise.complete.obs")
+csleepvemot2 <- cor(df$total.sleep[-33], df$emot[-33], use = "pairwise.complete.obs")
 
 ### Test sleep vs perf
 ggplot(df[-c(33), ], aes(x = total.sleep, y = perf)) + 
@@ -485,20 +492,20 @@ ggplot(df[-c(33), ], aes(x = total.sleep, y = perf)) +
   geom_smooth(method = "lm")
 
 # May want to remove observation 183 because it is a low outlier (check again but I don't think so)
-csleep-perf <- cor(df$total.sleep, df$perf, use = "pairwise.complete.obs")
+csleepvperf <- cor(df$total.sleep, df$perf, use = "pairwise.complete.obs")
 
 #with item 33 removed
-csleep-perf2 <- cor(df$total.sleep[-c(33)], df$perf[-c(33)], use = "pairwise.complete.obs")
+csleepvperf2 <- cor(df$total.sleep[-c(33)], df$perf[-c(33)], use = "pairwise.complete.obs")
 
 ### Test sleep vs part
 ggplot(df[-c(33), ], aes(x = total.sleep, y = part)) + 
   geom_point() + 
   geom_smooth(method = "lm")
 
-csleep-part <- cor(df$total.sleep, df$part, use = "pairwise.complete.obs")
+csleepvpart <- cor(df$total.sleep, df$part, use = "pairwise.complete.obs")
 
 #with item #33 removed
-csleep-part2 <- cor(df$total.sleep[-33], df$part[-33], use = "pairwise.complete.obs")
+csleepvpart2 <- cor(df$total.sleep[-33], df$part[-33], use = "pairwise.complete.obs")
 
 
 #######################################################################
@@ -506,6 +513,56 @@ csleep-part2 <- cor(df$total.sleep[-33], df$part[-33], use = "pairwise.complete.
 #Hypothesis 2 - Alternative to correlation can use linear model but I will use correlation above - done
 ### Test for relationship between engagement and sleep (total.sleep) using linear model ----
 
+### Test sleep vs total engagement
+ggplot(df[-33, ], aes(x = total.sleep, y = total.eng)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+sleepveng <- lm(total.eng ~ total.sleep, data = df[-33, ])
+plot(sleepveng)
+summary(sleepveng)
+#Significant effect p-value=.000266
+
+###Test sleep vs skills
+ggplot(df[-33, ], aes(x = total.sleep, y = skills)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+sleepvskills <- lm(skills ~ total.sleep, data = df[-33, ])
+plot(sleepvskills) 
+summary(sleepvskills)
+#highly significant p-value=.000000349
+
+### Test sleep vs emot
+ggplot(df[-33, ], aes(x = total.sleep, y = emot)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+sleepvemot <- lm(emot ~ total.sleep, data = df[-33, ])
+plot(sleepvemot)
+summary(sleepvemot)
+
+### Test sleep vs perf
+ggplot(df[-33, ], aes(x = total.sleep, y = perf)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+sleepvperf <- lm(perf ~ total.sleep, data = df[-33, ])
+plot(sleepvperf)
+summary(sleepvperf)
+# somewhat significant p-value=.00246
+
+### Test sleep vs part
+ggplot(df[-33, ], aes(x = total.sleep, y = part)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+sleepvpart <- lm(part ~ total.sleep, data = df[-33, ])
+plot(sleepvpart)
+summary(sleepvpart)
+
+
+#Just a repetition of above because I accidentally repeated the analysis but above looks cleaner
 ggplot(df[-33, ], aes(x = total.sleep, y = skills)) + 
   geom_point() + 
   geom_smooth(method = "lm")
@@ -673,8 +730,118 @@ df[, 33]
 
 
 ########################################################################
-#Hypothesis 3 - Mediational model
+#Hypothesis 3 - Mediational model -done
 
+#Independent variable = Stress
+#Dependent variable = AE/factors
+#Mediator = Sleep Hygiene
+
+#First step - Regress the dependent variable on the independent variable. Use linear model.
+
+### Test stress vs total engagement
+ggplot(df[-33, ], aes(x = total.stress, y = total.eng)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+stressveng <- lm(total.eng ~ total.stress, data = df[-33, ])
+plot(stressveng)
+summary(stressveng)
+
+###Test stress vs skills
+ggplot(df[-33, ], aes(x = total.stress, y = skills)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+stressvskills <- lm(skills ~ total.stress, data = df[-33, ])
+plot(stressvskills) 
+summary(stressvskills)
+#Significant effect 
+
+### Test stress vs emot
+ggplot(df[-33, ], aes(x = total.stress, y = emot)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+stressvemot <- lm(emot ~ total.stress, data = df[-33, ])
+plot(stressvemot)
+summary(stressvemot)
+
+### Test stress vs perf
+ggplot(df[-33, ], aes(x = total.stress, y = perf)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+stressvperf <- lm(perf ~ total.stress, data = df[-33, ])
+plot(stressvperf)
+summary(stressvperf)
+
+### Test stress vs part
+ggplot(df[-33, ], aes(x = total.stress, y = part)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+stressvpart <- lm(part ~ total.stress, data = df[-33, ])
+plot(stressvpart)
+summary(stressvpart)
+
+#Only significant regression is on stress vs skills
+
+
+#Second step - Regress the mediator (sleep hygiene) on the independent variable (stress)
+
+### Test sleep vs stress
+ggplot(df[-33, ], aes(x = total.sleep, y = total.stress)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+sleepvstress <- lm(total.stress ~ total.sleep, data = df[-33, ])
+plot(sleepvstress)
+summary(sleepvstress)
+#highly significant p-value=.00000271
+
+
+#Don't need the correlations of stress and sleep hygiene done here because I did linear model above
+#Simple plot of the relationship between stress and sleep
+ggplot(df, aes(x = total.stress, y = total.sleep)) + 
+  geom_text(aes(label = ID)) + 
+  geom_smooth(method = "lm")
+# correlation of stress and sleep hygiene
+cstressvsleep <- cor(df$total.stress, df$total.sleep, use = "pairwise.complete.obs")
+#remove outlier 33
+cstressvsleep2 <- cor(df$total.stress[-33], df$total.sleep[-33], use = "pairwise.complete.obs")
+#0.323
+
+#Third step - Regress the dependent variable on the mediator and independent variable
+
+engstresssleep <- lm(total.eng ~ total.stress + total.sleep, data = df[-33, ])
+#Create summary of the model for evaluation
+sengstresssleep <- summary(engstresssleep)
+# View the summary
+print(sengstresssleep)
+#The effect size of .303 for mediator is signif at p-value=0.000268
+#The effect size for stress decreased from .02342 to -0.02558
+
+skillsstresssleep <- lm(skills ~ total.stress + total.sleep, data = df[-33, ])
+skillsstresssleep <- summary(skillsstresssleep)
+print(skillsstresssleep)
+##The effect size of .150 for mediator is signif at p-value=0.0000179
+#The effect size for stress decreased from .05733 to 0.03308 (sign to nonsign)
+
+emotstresssleep <- lm(emot ~ total.stress + total.sleep, data = df[-33, ])
+emotstresssleep <- summary(emotstresssleep)
+print(emotstresssleep)
+
+partstresssleep <- lm(part ~ total.stress + total.sleep, data = df[-33, ])
+partstresssleep <- summary(partstresssleep)
+print(partstresssleep)
+##The effect size of .07155 for mediator is slightly signif at p-value=0.038
+#The effect size for stress decreased from -.02928 to -0.04085 (further from zero)
+
+perfstresssleep <- lm(perf ~ total.stress + total.sleep, data = df[-33, ])
+perfstresssleep <- summary(perfstresssleep)
+print(perfstresssleep)
+##The effect size of .045593 for mediator is signif at p-value=0.00796
+#The effect size for stress decreased from .013090 to 0.005721 (sign. to nonsign.)
 
 
 ##########################################################################
@@ -696,9 +863,9 @@ ggplot(df, aes(x = total.stress, y = total.exercise)) +
   geom_smooth(method = "lm")
 
 # correlation of stress and exercise
-cstress-exercise <- cor(df$total.stress, df$total.exercise, use = "pairwise.complete.obs")
+cstressvexercise <- cor(df$total.stress, df$total.exercise, use = "pairwise.complete.obs")
 #remove outlier 33
-cstress-exercise2 <- cor(df$total.stress[-33], df$total.exercise[-33], use = "pairwise.complete.obs")
+cstressvexercise2 <- cor(df$total.stress[-33], df$total.exercise[-33], use = "pairwise.complete.obs")
 
 
 #Simple plot of the relationship between exercise and total engagement
@@ -707,48 +874,48 @@ ggplot(df, aes(x = total.exercise, y = total.eng)) +
   geom_smooth(method = "lm")
 
 # correlation of exercise and total eng
-cexercise-eng <- cor(df$total.exercise, df$total.eng, use = "pairwise.complete.obs")
-cexercise-eng2 <- cor(df$total.exercise[-33], df$total.eng[-33], use = "pairwise.complete.obs")
+cexerciseveng <- cor(df$total.exercise, df$total.eng, use = "pairwise.complete.obs")
+cexerciseveng2 <- cor(df$total.exercise[-33], df$total.eng[-33], use = "pairwise.complete.obs")
 
 ### Test Exercise vs skills - correlation
 ggplot(df[-33, ], aes(x = total.exercise, y = skills)) + 
   geom_point() + 
   geom_smooth(method = "lm")
 
-cexercise-skills <- cor(df$total.exercise, df$skills, use = "pairwise.complete.obs")
+cexercisevskills <- cor(df$total.exercise, df$skills, use = "pairwise.complete.obs")
 
 #with no item33
-cexercise-skills2 <- cor(df$total.exercise[-33], df$skills[-33], use = "pairwise.complete.obs")
+cexercisevskills2 <- cor(df$total.exercise[-33], df$skills[-33], use = "pairwise.complete.obs")
 
 ### Test exercise vs emot
 ggplot(df, aes(x = total.exercise, y = emot)) + 
   geom_point() + 
   geom_smooth(method = "lm")
 
-cexercise-emot <- cor(df$total.exercise, df$emot, use = "pairwise.complete.obs")
+cexercisevemot <- cor(df$total.exercise, df$emot, use = "pairwise.complete.obs")
 
 #with no item 33
-cexercise-emot2 <- cor(df$total.exercise[-33], df$emot[-33], use = "pairwise.complete.obs")
+cexercisevemot2 <- cor(df$total.exercise[-33], df$emot[-33], use = "pairwise.complete.obs")
 
 ### Test exercise vs perf
 ggplot(df[-c(33), ], aes(x = total.exercise, y = perf)) + 
   geom_point() + 
   geom_smooth(method = "lm")
 
-cexercise-perf <- cor(df$total.exercise, df$perf, use = "pairwise.complete.obs")
+cexercisevperf <- cor(df$total.exercise, df$perf, use = "pairwise.complete.obs")
 
 #with no item 33
-cexercise-perf2 <- cor(df$total.exercise[-33], df$perf[-33], use = "pairwise.complete.obs")
+cexercisevperf2 <- cor(df$total.exercise[-33], df$perf[-33], use = "pairwise.complete.obs")
 
 ### Test exercise vs part ----
 ggplot(df[-c(33), ], aes(x = total.exercise, y = part)) + 
   geom_point() + 
   geom_smooth(method = "lm")
 
-cexercise-part <- cor(df$total.exercise, df$part, use = "pairwise.complete.obs")
+cexercisevpart <- cor(df$total.exercise, df$part, use = "pairwise.complete.obs")
 
 #with no item 33
-cexercise-part2 <- cor(df$total.exercise[-33], df$part[-33], use = "pairwise.complete.obs")
+cexercisevpart2 <- cor(df$total.exercise[-33], df$part[-33], use = "pairwise.complete.obs")
 
 
 ################################################################################################
