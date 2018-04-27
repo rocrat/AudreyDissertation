@@ -67,6 +67,8 @@ sd(df$total.sleep)
 
 mean(df$total.eng)
 sd(df$total.eng)
+mean(df$total.eng, na.rm = TRUE)
+sd(df$total.eng, na.rm = TRUE)
 
 mean(df$skills)
 sd(df$skills)
@@ -76,6 +78,8 @@ sd(df$emot)
 
 mean(df$part)
 sd(df$part)
+mean(df$part, na.rm = TRUE)
+sd(df$part, na.rm = TRUE)
 
 mean(df$perf)
 sd(df$perf)
