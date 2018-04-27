@@ -187,6 +187,49 @@ doc <- docx()
 doc <- addFlexTable(doc, RFtbl)
 writeDoc(doc, "Random_Forest_Comnined_Result_Table.docx")
 
+### created table with importance rankings----
+RFmse <- RFres[which(RFres$measure == "% Increase MSE"), -which(grepl("SD", names(RFres)))]
+
+rankedVars.mse <- as.data.frame(matrix(nrow = 7, ncol = 5))
+j <- 0
+for(i in 3:7){
+  j <- j +1
+  rankedVars.mse[, j] <- RFmse$Variable[rev(order(unlist(unclass(RFmse[, i]))))] 
+}
+
+RFrss <- RFres[which(RFres$measure == "Increase in RSS"), -which(grepl("SD", names(RFres)))]
+
+rankedVars.rss <- as.data.frame(matrix(nrow = 7, ncol = 5))
+j <- 0
+for(i in 3:7){
+  j <- j +1
+  rankedVars.rss[, j] <- RFrss$Variable[rev(order(unlist(unclass(RFrss[, i]))))] 
+}
+
+names(rankedVars.mse) <- names(rankedVars.rss) <- c("Academic Eng",
+                                                    "Skills",
+                                                    "Emotional",
+                                                    "Participation",
+                                                    "Performance")
+
+mseTbl <- FlexTable(rankedVars.mse, 
+                    add.rownames = FALSE,
+                    header.cell.props = cellProperties(padding = 2),
+                    body.cell.props = cellProperties(padding = 2))
+
+rssTbl <- FlexTable(rankedVars.rss, 
+                    add.rownames = FALSE,
+                    header.cell.props = cellProperties(padding = 2),
+                    body.cell.props = cellProperties(padding = 2))
+
+doc <- docx()
+doc <- addParagraph(doc, "Ranking based on MSE")
+doc <- addFlexTable(doc, mseTbl)
+doc <- addParagraph(doc, "Ranking based on RSS")
+doc <- addFlexTable(doc, rssTbl)
+writeDoc(doc, file = "Variable_Rankings_For_RF_by_Metric.docx")
+
+
 library(party)
 rf2 <- cforest(total.eng ~ total.sleep +
                       total.stress + 
