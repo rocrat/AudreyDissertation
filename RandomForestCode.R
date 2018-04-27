@@ -107,24 +107,128 @@ ggplot(rfErrorl, aes(x = mtry, y = MSE)) +
 
 #Select number of variables (mtry) based on minimum MSE of prediction and fit on full data ----
 
-rf1 <- randomForest(total.eng ~ total.sleep +
-                      total.stress + 
-                      total.exercise + 
-                      ethnicity + 
-                      gender + 
-                      age +
-                      class, 
-                    mtry = 1,
-                    data = df, 
-                    importance = TRUE,
-                    na.action = na.omit)
 
-#check for error convergence
-plot(rf1) 
+# to avoid instabiliuty of importance measures we fit forest many times and average importances
+source("RCode/RandomForestFittingFunction.R")
 
-### This gives the relative importance of each variable
-rf1$importance
-importance(rf1, type = 1)
+eng <- skill <- emo <- part <- perf <- vector(mode = "list", length = 500)
+for(i in 1:500){
+  eng[[i]] <- rforest.imp(x = "total.eng", mtry = 2, iter = i)
+  skill[[i]] <- rforest.imp(x = "skills", mtry = 2, iter = i)
+  emo[[i]] <- rforest.imp(x = "emot", mtry = 2, iter = i)
+  part[[i]] <- rforest.imp(x = "part", mtry = 2, iter = i)
+  perf[[i]] <- rforest.imp(x = "perf", mtry = 2, iter = i)
+}
+
+Eng <- do.call(rbind, eng) %>%
+  group_by(Variable, measure) %>%
+  summarize(avg = round(mean(value), 2), 
+            SD = round(sd(value), 2))  
+
+Skill  <- do.call(rbind, skill) %>%
+  group_by(Variable, measure) %>%
+  summarize(avg = round(mean(value), 2), 
+            SD = round(sd(value), 2)) 
+
+Emot  <- do.call(rbind, emo) %>%
+  group_by(Variable, measure) %>%
+  summarize(avg = round(mean(value), 2), 
+            SD = round(sd(value), 2)) 
+
+Part  <- do.call(rbind, part) %>%
+  group_by(Variable, measure) %>%
+  summarize(avg = round(mean(value), 2), 
+            SD = round(sd(value), 2)) 
+
+Perf <- do.call(rbind, perf) %>%
+  group_by(Variable, measure) %>%
+  summarize(avg = round(mean(value), 2), 
+            SD = round(sd(value), 2)) 
+
+### Create table of results ----
+RFres <- left_join(Eng, Skill, by  = c("Variable", "measure")) %>%
+  left_join(Emot, by  = c("Variable", "measure")) %>%
+  left_join(Part, by  = c("Variable", "measure")) %>%
+  left_join(Perf, by  = c("Variable", "measure")) 
+
+RFres$measure <- ifelse(RFres$measure == "%IncMSE",
+                        "% Increase MSE",
+                        "Increase in RSS")
+
+RFres$Variable <- gsub("total\\.", "", RFres$Variable)
+RFres$Variable <- paste0(toupper(gsub("^([a-z])([a-z]*)", "\\1", RFres$Variable)),
+                         gsub("^([a-z])([a-z]*)", "\\2", RFres$Variable))
+
+library(ReporteRs)
+RFtbl <- FlexTable(RFres, 
+                   header.columns = FALSE, 
+                   add.rownames = FALSE,
+                   header.cell.props = cellProperties(padding = 2),
+                   body.cell.props = cellProperties(padding = 2))
+RFtbl <- addHeaderRow(RFtbl, 
+                      value = c("",
+                                "",
+                                "Academic Eng",
+                                "Skills",
+                                "Emotional",
+                                "Participation",
+                                "Performance"),
+                      colspan = c(1, 1, 2, 2, 2, 2, 2))
+RFtbl <- addHeaderRow(RFtbl,
+                      value = c("Variable", 
+                                "Importance Meas.",
+                                rep(c("Mean", "Stdev"), 5)))
+
+RFtbl <- spanFlexTableRows(RFtbl, 
+                           j = 1,
+                           runs = RFres$Variable)
+
+doc <- docx()
+doc <- addFlexTable(doc, RFtbl)
+writeDoc(doc, "Random_Forest_Comnined_Result_Table.docx")
+
+### created table with importance rankings----
+RFmse <- RFres[which(RFres$measure == "% Increase MSE"), -which(grepl("SD", names(RFres)))]
+
+rankedVars.mse <- as.data.frame(matrix(nrow = 7, ncol = 5))
+j <- 0
+for(i in 3:7){
+  j <- j +1
+  rankedVars.mse[, j] <- RFmse$Variable[rev(order(unlist(unclass(RFmse[, i]))))] 
+}
+
+RFrss <- RFres[which(RFres$measure == "Increase in RSS"), -which(grepl("SD", names(RFres)))]
+
+rankedVars.rss <- as.data.frame(matrix(nrow = 7, ncol = 5))
+j <- 0
+for(i in 3:7){
+  j <- j +1
+  rankedVars.rss[, j] <- RFrss$Variable[rev(order(unlist(unclass(RFrss[, i]))))] 
+}
+
+names(rankedVars.mse) <- names(rankedVars.rss) <- c("Academic Eng",
+                                                    "Skills",
+                                                    "Emotional",
+                                                    "Participation",
+                                                    "Performance")
+
+mseTbl <- FlexTable(rankedVars.mse, 
+                    add.rownames = FALSE,
+                    header.cell.props = cellProperties(padding = 2),
+                    body.cell.props = cellProperties(padding = 2))
+
+rssTbl <- FlexTable(rankedVars.rss, 
+                    add.rownames = FALSE,
+                    header.cell.props = cellProperties(padding = 2),
+                    body.cell.props = cellProperties(padding = 2))
+
+doc <- docx()
+doc <- addParagraph(doc, "Ranking based on MSE")
+doc <- addFlexTable(doc, mseTbl)
+doc <- addParagraph(doc, "Ranking based on RSS")
+doc <- addFlexTable(doc, rssTbl)
+writeDoc(doc, file = "Variable_Rankings_For_RF_by_Metric.docx")
+
 
 library(party)
 rf2 <- cforest(total.eng ~ total.sleep +
