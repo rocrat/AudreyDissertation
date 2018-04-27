@@ -36,7 +36,7 @@ df$total.eng <- with(df, skills + emot + perf + part)
 df$total.exercise.notweighted <- df$e195+df$e196+df$e197
 ### First calculate the total exercise score using weighted sum 
 df$total.exercise <- with(df, 9*e195 + 6*e196 + 3*e197)
-
+df <- df[-33, ]
 
 #Subset data into training and testing sets ----
 set.seed(1014)
@@ -55,7 +55,7 @@ set.seed(2010)
 rfError <- data.frame(outBag_error = rep(NA, 6),
                       pred_error = rep(NA, 6),
                       mtry = 1:6)
-# Loop thorugh each possible number of predictors in each tree and 
+# Loop through each possible number of predictors in each tree and 
 # calculate performance of the model
 for(mtry in rfError$mtry){
   rftmp <- randomForest(total.eng ~ total.sleep +
