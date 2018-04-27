@@ -26,6 +26,10 @@ df$perf <- with(df, 0.77*m163 + 0.68*m164 + 0.64*m165)
 
 #creating the other variables as part of the data field.
 df$total.stress <- rowSums(df[, which(grepl("^s\\d{1,2}" , names(df)))], na.rm = TRUE)
+# Recode stress variables, set 2 = 0 and 1 = 1 (because they had coded 2=no incidence of the stressor)
+df[, which(grepl("^s\\d{1,2}" , names(df)))] <- apply(df[, which(grepl("^s\\d{1,2}" , names(df)))],
+                                                      c(1, 2),
+                                                      function(x) if(!is.na(x) & x == 2) x = 0 else x)
 df$total.sleep <- rowSums(df[, which(grepl("^b\\d{1,2}" , names(df)))], na.rm = TRUE)
 #figure out which one is more appropriate to use, without factor loadings
 df$total.eng <-  apply(df[, which(grepl("^m.*", names(df)))], 1, sum,  na.rm = TRUE)
@@ -37,6 +41,20 @@ df$total.exercise.notweighted <- df$e195+df$e196+df$e197
 ### First calculate the total exercise score using weighted sum 
 df$total.exercise <- with(df, 9*e195 + 6*e196 + 3*e197)
 df <- df[-33, ]
+
+ind <- complete.cases(df[, c("total.eng",
+                             "total.sleep",
+                             "total.stress", 
+                             "total.exercise", 
+                             "ethnicity",
+                             "gender", 
+                             "age",
+                             "class",
+                             "skills",
+                             "emot",
+                             "part",
+                             "perf")])
+df <- df[ind, ]
 
 #Subset data into training and testing sets ----
 set.seed(1014)
@@ -52,18 +70,20 @@ dftest <- df[-trainIndex, ]
 set.seed(2010)
 
 # Create containers for the results
-rfError <- data.frame(outBag_error = rep(NA, 6),
-                      pred_error = rep(NA, 6),
-                      mtry = 1:6)
+rfError <- data.frame(outBag_error = rep(NA, 7),
+                      pred_error = rep(NA, 7),
+                      mtry = 1:7)
+
 # Loop through each possible number of predictors in each tree and 
 # calculate performance of the model
 for(mtry in rfError$mtry){
   rftmp <- randomForest(total.eng ~ total.sleep +
-                        total.stress + 
-                        total.exercise + 
-                        ethnicity + 
-                        gender + 
-                        age, 
+                          total.stress + 
+                          total.exercise + 
+                          ethnicity + 
+                          gender + 
+                          age +
+                          class, 
                       mtry = mtry,
                       data = dftrain, 
                       na.action = na.omit)
@@ -92,9 +112,11 @@ rf1 <- randomForest(total.eng ~ total.sleep +
                       total.exercise + 
                       ethnicity + 
                       gender + 
-                      age, 
+                      age +
+                      class, 
                     mtry = 1,
                     data = df, 
+                    importance = TRUE,
                     na.action = na.omit)
 
 #check for error convergence
@@ -102,3 +124,21 @@ plot(rf1)
 
 ### This gives the relative importance of each variable
 rf1$importance
+importance(rf1, type = 1)
+
+library(party)
+rf2 <- cforest(total.eng ~ total.sleep +
+                      total.stress + 
+                      total.exercise + 
+                      ethnicity + 
+                      gender + 
+                      age +
+                      class, 
+                    controls = cforest_unbiased(mtry = 2, ntree = 1000),
+                    data = df)
+ rf2
+ 
+ plot(rf2)
+ 
+ varimp(rf2)
+ 
