@@ -1018,27 +1018,27 @@ summary(exercisevpart)
 ### Test moderation of exercise on relationship between exercise and academic engagement using multiple regression (equation from article)
 
 # Factored (total academic engagement) model with interaction for exercise
-engexercise <- lm(total.eng ~ total.stress + total.exercise + total.stress:total.exercise, data = df)
-#Create summary of the model for evaluation
-sengexercise <- summary(engexercise)
-# View the summary
-print(sengexercise)
-
-eng3exercise <- lm(skills ~ total.stress + total.exercise + total.stress:total.exercise, data = df)
-seng3exercise <- summary(eng3exercise)
-print(seng3exercise) #obs 33 poses issue here
-
-eng4exercise <- lm(emot ~ total.stress + total.exercise + total.stress:total.exercise, data = df)
-seng4exercise <- summary(eng4exercise)
-print(seng4exercise)
-
-eng5exercise <- lm(part ~ total.stress + total.exercise + total.stress:total.exercise, data = df)
-seng5exercise <- summary(eng5exercise) # obs 156 poses issue here
-print(seng5exercise)
-
-eng6exercise <- lm(perf ~ total.stress + total.exercise + total.stress:total.exercise, data = df)
-seng6exercise <- summary(eng6exercise) ## 33 and 183 pose issues here
-print(seng6exercise)
+# engexercise <- lm(total.eng ~ total.stress + total.exercise + total.stress:total.exercise, data = df)
+# #Create summary of the model for evaluation
+# sengexercise <- summary(engexercise)
+# # View the summary
+# print(sengexercise)
+# 
+# eng3exercise <- lm(skills ~ total.stress + total.exercise + total.stress:total.exercise, data = df)
+# seng3exercise <- summary(eng3exercise)
+# print(seng3exercise) #obs 33 poses issue here
+# 
+# eng4exercise <- lm(emot ~ total.stress + total.exercise + total.stress:total.exercise, data = df)
+# seng4exercise <- summary(eng4exercise)
+# print(seng4exercise)
+# 
+# eng5exercise <- lm(part ~ total.stress + total.exercise + total.stress:total.exercise, data = df)
+# seng5exercise <- summary(eng5exercise) # obs 156 poses issue here
+# print(seng5exercise)
+# 
+# eng6exercise <- lm(perf ~ total.stress + total.exercise + total.stress:total.exercise, data = df)
+# seng6exercise <- summary(eng6exercise) ## 33 and 183 pose issues here
+# print(seng6exercise)
 
 #Do above analysis with 33 omitted:
 
@@ -1054,13 +1054,75 @@ eng4exercise <- lm(emot ~ total.stress + total.exercise + total.stress:total.exe
 seng4exercise <- summary(eng4exercise)
 print(seng4exercise)
 
-eng5exercise <- lm(part ~ total.stress + total.exercise + total.stress:total.exercise, data = df[-33,])
+eng5exercise <- lm(part ~ total.stress + total.exercise + total.stress:total.exercise, 
+                   data = df[-33,])
 seng5exercise <- summary(eng5exercise)
 print(seng5exercise)
 
 eng6exercise <- lm(perf ~ total.stress + total.exercise + total.stress:total.exercise, data = df[-31,])
 seng6exercise <- summary(eng6exercise)
 print(seng6exercise)
+
+
+#Participation is the only significant interaction effect seen
+#create several plots to help interpret the interaction effect on participation
+ggplot(df[-33,], aes(x = total.stress, y = total.exercise, size = part)) +
+  geom_point(alpha = .5)
+library(scatterplot3d)
+
+scatterplot3d(x = df[-33, ]$total.stress, 
+              y = df[-33, ]$total.exercise, 
+              z = df[-33, ]$part)
+
+library(plotly)
+p <- plot_ly(df[, -33],
+              x = ~total.stress, 
+              y = ~total.exercise, 
+              z = ~part) %>%
+   add_markers() %>%
+   layout(scene = list(xaxis = list(title = "Stress"),
+                       yaxis = list(title = "Exercse"),
+                       zaxis = list(title = "Participation")))
+ 
+
+ggplot(df[-33, ], aes(x = total.stress, y = part)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  geom_smooth(method = "loess",
+              color = "green",
+              se = FALSE)
+
+ggplot(df[-33, ], aes(x = total.exercise, y = part)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  geom_smooth(method = "loess",
+              color = "green",
+              se = FALSE)
+ggplot(df[-33, ], aes(x = total.exercise, y = total.stress)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  geom_smooth(method = "loess",
+              color = "green",
+              se = FALSE)
+
+testdf <- expand.grid(seq(min(df[-33, ]$total.stress),
+                          max(df[-33, ]$total.stress),
+                          by = 1),
+                      seq(min(df[-33, ]$total.exercise),
+                          max(df[-33, ]$total.exercise),
+                          by = 1))
+names(testdf) <- c("total.stress","total.exercise")
+
+testdf$part <- predict(object = eng5exercise, newdata = testdf)
+ptest <- plot_ly(testdf,
+             x = ~total.stress, 
+             y = ~total.exercise, 
+             z = ~part) %>%
+  add_markers() %>%
+  layout(scene = list(xaxis = list(title = "Stress"),
+                      yaxis = list(title = "Exercse"),
+                      zaxis = list(title = "Participation")))
+
 
 
 ####################################################################
@@ -1165,6 +1227,190 @@ plot(rf1)
 ### This gives the relative importance of each variable
 rf1$importance
 
+#################################################################################
+
+#Hypothesis 6: Step 2: Likelihood ratio testing of nested models, forward selection (Stepwise regression?)
+
+#Start with creating model 1 for total engagement with only the most important variable from the random forest analysis (increase in RSS) included
+#Sleep was most important variable for total AE so add it first 
+#then look at other variables in order of importance:stress, exercise, ethnicity, class, age, gender
+model1eng <- lm(total.eng ~ total.sleep, data = df[-33,])
+smodel1eng <- summary(model1eng)
+print(smodel1eng)
+
+model2eng <- lm(total.eng ~ total.sleep + total.stress, data = df[-33,])
+smodel2eng <- summary(model2eng)
+print(smodel2eng)
+
+#compare fit of added variable
+anova(model1eng, model2eng)
+#Non-sign, stop here?
+
+model3eng <- lm(total.eng ~ total.sleep + total.stress + total.exercise, data = df[-33,])
+smodel3eng <- summary(model3eng)
+print(smodel3eng)
+
+#compare fit of added variable
+anova(model2eng, model3eng)
+
+model4eng <- lm(total.eng ~ total.sleep + total.stress + total.exercise + ethnicity, data = df[-33,])
+smodel4eng <- summary(model4eng)
+print(smodel4eng)
+
+#compare fit of added variable
+anova(model3eng, model4eng)
+
+model5eng <- lm(total.eng ~ total.sleep + total.stress + total.exercise + ethnicity + class, data = df[-33,])
+smodel5eng <- summary(model5eng)
+print(smodel5eng)
+
+#compare fit of added variable
+anova(model4eng, model5eng)
+
+model6eng <- lm(total.eng ~ total.sleep + total.stress + total.exercise + ethnicity + class + age, data = df[-33,])
+smodel6eng <- summary(model6eng)
+print(smodel6eng)
+
+#compare fit of added variable
+anova(model5eng, model6eng)
+
+model7eng <- lm(total.eng ~ total.sleep + total.stress + total.exercise + ethnicity + class + age + gender, data = df[-33,])
+smodel7eng <- summary(model7eng)
+print(smodel7eng)
+
+#compare fit of added variable
+anova(model6eng, model7eng)
+
+#Test out using %MSE from random forest to determine most important variables instead of using RSS as above
+#Sleep was most important variable for total AE with MES too so add it first 
+#then look at other variables in order of importance:ethnicity, class, stress, exercise, age, gender
+model1eng2 <- lm(total.eng ~ total.sleep, data = df[-33,])
+smodel1eng2 <- summary(model1eng2)
+print(smodel1eng2)
+
+model2eng2 <- lm(total.eng ~ total.sleep + ethnicity, data = df[-33,])
+smodel2eng2 <- summary(model2eng2)
+print(smodel2eng2)
+
+#compare fit of added variable
+anova(model1eng2, model2eng2)
+#Non-sign, stop here?
+
+model3eng2 <- lm(total.eng ~ total.sleep + ethnicity + class, data = df[-33,])
+smodel3eng2 <- summary(model3eng2)
+print(smodel3eng2)
+
+#compare fit of added variable
+anova(model2eng2, model3eng2)
+#check this, error message for here and next model - model4eng2
+
+model4eng2 <- lm(total.eng ~ total.sleep + ethnicity + class + stress, data = df[-33,])
+smodel4eng2 <- summary(model4eng2)
+print(smodel4eng2)
+
+#compare fit of added variable
+anova(model3eng2, model4eng2)
+
+
+###################################################################################################
+
+#Hypothesis 6: Step 2: Skills eng
+#Stress is most important
+#Then sleep, exercise, class, ethnicity, age, gender
+model1skills <- lm(skills ~ total.stress, data = df[-33,])
+smodel1skills <- summary(model1skills)
+print(smodel1skills)
+
+model2skills <- lm(skills ~ total.stress + total.sleep, data = df[-33,])
+smodel2skills <- summary(model2skills)
+print(smodel2skills)
+
+#compare fit of added variable
+anova(model1skills, model2skills)
+#sign p-value so keep going
+
+model3skills <- lm(skills ~ total.stress + total.sleep + total.exercise, data = df[-33,])
+smodel3skills <- summary(model3skills)
+print(smodel3skills)
+
+#compare fit of added variable
+anova(model2skills, model3skills)
+#non-sign p-value, stop here?
+
+##############################################################################################
+
+#Hypothesis 6: Step 2: Emot eng
+#Stress is most important
+#Then sleep, exercise, ethnicity, class, age, gender
+model1emot <- lm(emot ~ total.stress, data = df[-33,])
+smodel1emot <- summary(model1emot)
+print(smodel1emot)
+
+model2emot <- lm(emot ~ total.stress + total.sleep, data = df[-33,])
+smodel2emot <- summary(model2emot)
+print(smodel2emot)
+
+#compare fit of added variable
+anova(model1emot, model2emot)
+# so do I stop here because there is no significance?
+
+model3emot <- lm(emot ~ total.stress + total.sleep + total.exercise, data = df[-33,])
+smodel3emot <- summary(model3emot)
+print(smodel3emot)
+
+#compare fit of added variable
+anova(model2emot, model3emot)
+#but there is significance here. hmm...; probably just noise - this is the reason I did the random forest analysis
+
+##############################################################################################
+
+#Hypothesis 6: Step 2: Part. eng
+#Stress is most important
+#Then exercise, sleep, ethnicity, class, age, gender
+model1part <- lm(part ~ total.stress, data = df[-33,])
+smodel1part <- summary(model1part)
+print(smodel1part)
+
+model2part <- lm(part ~ total.stress + total.exercise, data = df[-33,])
+smodel2part <- summary(model2part)
+print(smodel2part)
+
+#compare fit of added variable
+anova(model1part, model2part)
+#Non-sign. Stop here?
+
+model3part <- lm(part ~ total.stress + total.exercise + total.sleep, data = df[-33,])
+smodel3part <- summary(model3part)
+print(smodel3part)
+
+#compare fit of added variable
+anova(model2part, model3part)
+#but this is significant...
+
+#############################################################################################
+
+#Hypothesis 6: Step 2: Perf eng
+#Stress is most important
+#Then sleep, exercise, ethnicity, class, age, gender
+model1perf <- lm(perf ~ total.stress, data = df[-33,])
+smodel1perf <- summary(model1perf)
+print(smodel1perf)
+
+model2perf <- lm(perf ~ total.stress + total.sleep, data = df[-33,])
+smodel2perf <- summary(model2perf)
+print(smodel2perf)
+
+#compare fit of added variable
+anova(model1perf, model2perf)
+#sign p-value, keep going.
+
+model3perf <- lm(perf ~ total.stress + total.sleep + total.exercise, data = df[-33,])
+smodel3perf <- summary(model3perf)
+print(smodel3perf)
+
+#compare fit of added variable
+anova(model2perf, model3perf)
+#non-sign, stop here?
 
 ################################################################################
 
