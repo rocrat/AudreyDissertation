@@ -859,14 +859,14 @@ engstresssleep <- lm(total.eng ~ total.stress + total.sleep, data = df[-33, ])
 sengstresssleep <- summary(engstresssleep)
 # View the summary
 print(sengstresssleep)
-#The effect size of .303 for mediator is signif at p-value=0.000268
-#The effect size for stress decreased from .02342 to -0.02558
+#The effect size of .312 for mediator is signif at p-value=0.000157
+#The effect size for stress decreased from  to 0.044
 
 skillsstresssleep <- lm(skills ~ total.stress + total.sleep, data = df[-33, ])
 skillsstresssleep <- summary(skillsstresssleep)
 print(skillsstresssleep)
-##The effect size of .150 for mediator is signif at p-value=0.0000179
-#The effect size for stress decreased from .05733 to 0.03308 (sign to nonsign)
+##The effect size of  for mediator is signif at p-value=
+#The effect size for stress decreased from  to  (sign to nonsign)
 
 emotstresssleep <- lm(emot ~ total.stress + total.sleep, data = df[-33, ])
 emotstresssleep <- summary(emotstresssleep)
@@ -875,14 +875,14 @@ print(emotstresssleep)
 partstresssleep <- lm(part ~ total.stress + total.sleep, data = df[-33, ])
 partstresssleep <- summary(partstresssleep)
 print(partstresssleep)
-##The effect size of .07155 for mediator is slightly signif at p-value=0.038
-#The effect size for stress decreased from -.02928 to -0.04085 (further from zero)
+##The effect size of  for mediator is slightly signif at p-value=
+#The effect size for stress decreased from  to - (further from zero)
 
 perfstresssleep <- lm(perf ~ total.stress + total.sleep, data = df[-33, ])
 perfstresssleep <- summary(perfstresssleep)
 print(perfstresssleep)
-##The effect size of .045593 for mediator is signif at p-value=0.00796
-#The effect size for stress decreased from .013090 to 0.005721 (sign. to nonsign.)
+##The effect size of  for mediator is signif at p-value=
+#The effect size for stress decreased from  to  (sign. to nonsign.)
 
 
 ##########################################################################
