@@ -1113,18 +1113,32 @@ testdf <- expand.grid(seq(min(df[-33, ]$total.stress),
                           by = 1))
 names(testdf) <- c("total.stress","total.exercise")
 
+grey.colors(n = 2)
+
 testdf$part <- predict(object = eng5exercise, newdata = testdf)
 ptest <- plot_ly(testdf,
              x = ~total.stress, 
              y = ~total.exercise, 
-             z = ~part) %>%
+             z = ~part,
+             marker = list(color = ~part,
+                           # colorscale = "Greys",
+                           showscale = FALSE)) %>%
   add_markers() %>%
   layout(scene = list(xaxis = list(title = "Stress"),
-                      yaxis = list(title = "Exercse"),
-                      zaxis = list(title = "Participation")))
+                      yaxis = list(title = "Exercise"),
+                      zaxis = list(title = "Part/Int")))
 
+sufz <- testdf %>%
+  spread(key = total.stress, value = part) %>%
+  select(-total.exercise) %>%
+  as.matrix()
 
-
+sufp <- plot_ly(z = sufz) %>%
+  add_surface(showscale = FALSE,
+              colorscale = "Greys") %>%
+  layout(scene = list(xaxis = list(title = "Stress"),
+                      yaxis = list(title = "Exercise"),
+                      zaxis = list(title = "Part/Int")))
 ####################################################################
 
 # Hypothesis 6 - Predictive model of influence of variables on AE
