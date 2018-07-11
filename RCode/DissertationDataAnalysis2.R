@@ -935,7 +935,7 @@ ggplot(df, aes(x = total.exercise, y = emot)) +
 
 cexercisevemot <- cor(df$total.exercise, df$emot, use = "pairwise.complete.obs")
 
-#with no item 33
+#with no subject 33
 cexercisevemot2 <- cor.test(df$total.exercise[-33], df$emot[-33], use = "pairwise.complete.obs")
 
 ### Test exercise vs perf
@@ -1055,7 +1055,7 @@ seng4exercise <- summary(eng4exercise)
 print(seng4exercise)
 
 eng5exercise <- lm(part ~ total.stress + total.exercise + total.stress:total.exercise, 
-                   data = df[-33,])
+                   data = df[-c(33), ])
 seng5exercise <- summary(eng5exercise)
 print(seng5exercise)
 
@@ -1081,16 +1081,32 @@ p <- plot_ly(df[, -33],
               z = ~part) %>%
    add_markers() %>%
    layout(scene = list(xaxis = list(title = "Stress"),
-                       yaxis = list(title = "Exercse"),
+                       yaxis = list(title = "Exercise"),
                        zaxis = list(title = "Participation")))
  
-
-ggplot(df[-33, ], aes(x = total.stress, y = part)) +
+df[-33, ] %>%
+  filter(total.exercise < 35) %>%
+  ggplot(aes(x = total.stress, y = part)) +
   geom_point() +
   geom_smooth(method = "lm") +
-  geom_smooth(method = "loess",
-              color = "green",
-              se = FALSE)
+  ylab("Participation / Interaction") +
+  xlab("Stress") +
+  ggtitle("Exercise < 35")
+ggsave("./Figures/Stress_Vs_Part_Low_Exercise.png",
+       width = 6,
+       height = 5)
+
+df[-33, ] %>%
+  filter(total.exercise > 65) %>%
+  ggplot(aes(x = total.stress, y = part)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  ylab("Participation / Interaction") +
+  xlab("Stress") +
+  ggtitle("Exercise > 65") 
+ggsave("./Figures/Stress_Vs_Part_High_Exercise.png",
+       width = 6,
+       height = 5)
 
 ggplot(df[-33, ], aes(x = total.exercise, y = part)) +
   geom_point() +
