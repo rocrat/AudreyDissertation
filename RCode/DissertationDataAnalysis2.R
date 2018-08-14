@@ -4,8 +4,9 @@ library(plyr)
 library(dplyr)
 library(ggplot2)
 library(cowplot)
+library(moments)
 
-df <- as.data.set(spss.system.file("./Rcode/Data/College coping data (complete).sav"))
+df <- as.data.set(spss.system.file("./Data/College coping data (complete).sav"))
 df <- as.data.frame(df)
 
 #reshape to long form
@@ -59,34 +60,57 @@ df$total.exercise.notweighted <- df$e195+df$e196+df$e197
 df$total.exercise <- with(df, 9*e195 + 6*e196 + 3*e197)
 
 #Mean scores of the variables
-mean(df$total.stress)
-sd(df$total.stress)
+mean(df$total.stress[-33])
+sd(df$total.stress[-33])
+range(df$total.stress[-33])
+skewness(df$total.stress[-33])
+kurtosis(df$total.stress[-33])
 
-mean(df$total.sleep)
-sd(df$total.sleep)
+mean(df$total.sleep[-33])
+sd(df$total.sleep[-33])
+range(df$total.sleep[-33])
+skewness(df$total.sleep[-33])
+kurtosis(df$total.sleep[-33])
 
-mean(df$total.eng)
-sd(df$total.eng)
-mean(df$total.eng, na.rm = TRUE)
-sd(df$total.eng, na.rm = TRUE)
+mean(df$total.eng[-33])
+sd(df$total.eng[-33])
+mean(df$total.eng, na.rm = TRUE[-33])
+sd(df$total.eng, na.rm = TRUE[-33])
+range(df$total.eng, na.rm = TRUE[-33])
+skewness(df$total.eng, na.rm = TRUE[-33])
+kurtosis(df$total.eng, na.rm = TRUE[-33])
 
-mean(df$skills)
-sd(df$skills)
+mean(df$skills[-33])
+sd(df$skills[-33])
+range(df$skills[-33])
+skewness(df$skills[-33])
+kurtosis(df$skills[-33])
 
-mean(df$emot)
-sd(df$emot)
+mean(df$emot[-33])
+sd(df$emot[-33])
+range(df$emot[-33])
+skewness(df$emot[-33])
+kurtosis(df$emot[-33])
 
-mean(df$part)
-sd(df$part)
-mean(df$part, na.rm = TRUE)
-sd(df$part, na.rm = TRUE)
+mean(df$part[-33])
+sd(df$part[-33])
+mean(df$part, na.rm = TRUE[-33])
+sd(df$part, na.rm = TRUE[-33])
+range(df$part, na.rm = TRUE[-33])
+skewness(df$part, na.rm = TRUE[-33])
+kurtosis(df$part, na.rm = TRUE[-33])
 
-mean(df$perf)
-sd(df$perf)
+mean(df$perf[-33])
+sd(df$perf[-33])
+range(df$perf[-33])
+skewness(df$perf[-33])
+kurtosis(df$perf[-33])
 
-mean(df$total.exercise)
-sd(df$total.exercise)
-
+mean(df$total.exercise[-33])
+sd(df$total.exercise[-33])
+range(df$total.exercise[-33])
+skewness(df$total.exercise[-33])
+kurtosis(df$total.exercise[-33])
 
 # Example equation of correlation of variables with academic eng factors (correlation of sleep hygiene and skills eng)
 #csleep-skills_noOutlier <- cor(df$total.sleep[-33], df$skills[-33], use = "pairwise.complete.obs")
@@ -426,6 +450,110 @@ cbe2 <- cor(df$total.sleep[-33], df$total.exercise[-33], use = "pairwise.complet
 # add cor.test to get p-values
 cbe2 <- cor.test(df$total.sleep[-33], df$total.exercise[-33], use = "pairwise.complete.obs")
 
+
+
+#check intercorrelations of Academic Engagement and the four factors for table:
+
+#Simple plot of the relationship between total engagment and skills factor
+ggplot(df, aes(x = total.eng, y = skills)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+# correlation of total engagement and skills factor
+cengvskills <- cor(df$total.eng, df$skills, use = "pairwise.complete.obs")
+# add cor.test to get p-values, and remove outlier 33
+cengvskills2 <- cor.test(df$total.eng[-33], df$skills[-33], use = "pairwise.complete.obs")
+
+#Simple plot of the relationship between total engagment and emotional factor
+ggplot(df, aes(x = total.eng, y = emot)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+# correlation of total engagement and emotional factor
+cengvemot <- cor(df$total.eng, df$emot, use = "pairwise.complete.obs")
+# add cor.test to get p-values, and remove outlier 33
+cengvemot2 <- cor.test(df$total.eng[-33], df$emot[-33], use = "pairwise.complete.obs")
+
+#Simple plot of the relationship between total engagment and participation/interaction factor
+ggplot(df, aes(x = total.eng, y = part)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+# correlation of total engagement and Participation/interaction factor
+cengvpart <- cor(df$total.eng, df$part, use = "pairwise.complete.obs")
+# add cor.test to get p-values, and remove outlier 33
+cengvpart2 <- cor.test(df$total.eng[-33], df$part[-33], use = "pairwise.complete.obs")
+
+#Simple plot of the relationship between total engagment and performance factor
+ggplot(df, aes(x = total.eng, y = perf)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+# correlation of total engagement and performance factor
+cengvperf <- cor(df$total.eng, df$perf, use = "pairwise.complete.obs")
+# add cor.test to get p-values, and remove outlier 33
+cengvperf2 <- cor.test(df$total.eng[-33], df$perf[-33], use = "pairwise.complete.obs")
+
+#Simple plot of the relationship between skills factor and emotional factor
+ggplot(df, aes(x = skills, y = emot)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+# correlation of skills factor and emotional factor
+cskillsvemot <- cor(df$skills, df$emot, use = "pairwise.complete.obs")
+# add cor.test to get p-values, and remove outlier 33
+cskillsvemot2 <- cor.test(df$skills[-33], df$emot[-33], use = "pairwise.complete.obs")
+
+#Simple plot of the relationship between skills factor and participation/interaction factor
+ggplot(df, aes(x = skills, y = part)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+# correlation of skills factor and part/int factor
+cskillsvpart <- cor(df$skills, df$part, use = "pairwise.complete.obs")
+# add cor.test to get p-values, and remove outlier 33
+cskillsvpart2 <- cor.test(df$skills[-33], df$part[-33], use = "pairwise.complete.obs")
+
+
+#Simple plot of the relationship between skills factor and performance factor
+ggplot(df, aes(x = skills, y = perf)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+# correlation of skills factor and performance factor
+cskillsvperf <- cor(df$skills, df$perf, use = "pairwise.complete.obs")
+# add cor.test to get p-values, and remove outlier 33
+cskillsvperf2 <- cor.test(df$skills[-33], df$perf[-33], use = "pairwise.complete.obs")
+
+#Simple plot of the relationship between Participation/interaction factor and emotional factor
+ggplot(df, aes(x = part, y = emot)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+# correlation of part/int factor and emotional factor
+cpartvemot <- cor(df$part, df$emot, use = "pairwise.complete.obs")
+# add cor.test to get p-values, and remove outlier 33
+cpartvemot2 <- cor.test(df$part[-33], df$emot[-33], use = "pairwise.complete.obs")
+
+#Simple plot of the relationship between performance factor and emotional factor
+ggplot(df, aes(x = perf, y = emot)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+# correlation of performance factor and emotional factor
+cperfvemot <- cor(df$perf, df$emot, use = "pairwise.complete.obs")
+# add cor.test to get p-values, and remove outlier 33
+cperfvemot2 <- cor.test(df$perf[-33], df$emot[-33], use = "pairwise.complete.obs")
+
+#Simple plot of the relationship between participation/interaction factor and performance factor
+ggplot(df, aes(x = part, y = perf)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+
+# correlation of part/int factor and performance factor
+cpartvperf <- cor(df$part, df$perf, use = "pairwise.complete.obs")
+# add cor.test to get p-values, and remove outlier 33
+cpartvperf2 <- cor.test(df$part[-33], df$perf[-33], use = "pairwise.complete.obs")
 #######################################################################################
 
 #Hypothesis 1 - done
@@ -1083,30 +1211,50 @@ p <- plot_ly(df[, -33],
    layout(scene = list(xaxis = list(title = "Stress"),
                        yaxis = list(title = "Exercise"),
                        zaxis = list(title = "Participation")))
- 
+
+
+#creating plots of high and low for interpretation using quantiles of high, medium, and low
 df[-33, ] %>%
-  filter(total.exercise < 35) %>%
+  filter(total.exercise > quantile(total.exercise, probs=.67)) %>%
   ggplot(aes(x = total.stress, y = part)) +
   geom_point() +
   geom_smooth(method = "lm") +
   ylab("Participation / Interaction") +
   xlab("Stress") +
-  ggtitle("Exercise < 35")
-ggsave("./Figures/Stress_Vs_Part_Low_Exercise.png",
+  ggtitle(paste0("Exercise > ",
+                 quantile(df[-33, ]$total.exercise, probs = 0.67)))
+ggsave("./Figures/Stress_Vs_Part_High_Exercise.png",
        width = 6,
        height = 5)
 
 df[-33, ] %>%
-  filter(total.exercise > 65) %>%
+  filter(total.exercise > quantile(total.exercise, probs=.34),
+         total.exercise < quantile(total.exercise, probs=.67)) %>%
   ggplot(aes(x = total.stress, y = part)) +
   geom_point() +
   geom_smooth(method = "lm") +
   ylab("Participation / Interaction") +
   xlab("Stress") +
-  ggtitle("Exercise > 65") 
+  ggtitle(paste0("Exercise > ",
+                 quantile(df[-33, ]$total.exercise, probs = 0.34), ))
 ggsave("./Figures/Stress_Vs_Part_High_Exercise.png",
        width = 6,
        height = 5)
+
+df[-33, ] %>%
+  filter(total.exercise < quantile(total.exercise, probs=.34)) %>%
+  ggplot(aes(x = total.stress, y = part)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  ylab("Participation / Interaction") +
+  xlab("Stress") +
+  ggtitle(paste0("Exercise < ",
+                 quantile(df[-33, ]$total.exercise, probs = 0.34)))
+ggsave("./Figures/Stress_Vs_Part_High_Exercise.png",
+       width = 6,
+       height = 5)
+
+
 
 ggplot(df[-33, ], aes(x = total.exercise, y = part)) +
   geom_point() +
